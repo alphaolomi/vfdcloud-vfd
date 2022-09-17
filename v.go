@@ -59,7 +59,7 @@ type (
 	) (*RegistrationResponse, error)
 
 	TokenFetchFunc func(
-		ctx context.Context, request *TokenRequest,
+		ctx context.Context, url string, request *TokenRequest,
 	) (*TokenResponse, error)
 
 	ReportSubmitFunc func(
@@ -111,12 +111,14 @@ type (
 	}
 
 	ReceiptSubmitter interface {
-		SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+		SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders,
+			privateKey *rsa.PrivateKey,
 			receipt *models.RCT) (*Response, error)
 	}
 
 	ReportSubmitter interface {
-		SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+		SubmitReport(ctx context.Context, url string, headers *RequestHeaders,
+			privateKey *rsa.PrivateKey,
 			report *models.Report) (*Response, error)
 	}
 )
@@ -163,18 +165,25 @@ func SignPayload(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte
 	return out, nil
 }
 
-func (registrar RegisterClientFunc) Register(ctx context.Context, request *RegistrationRequest) (*RegistrationResponse, error) {
+func (registrar RegisterClientFunc) Register(ctx context.Context, request *RegistrationRequest) (
+	*RegistrationResponse, error) {
 	return registrar(ctx, request)
 }
 
-func (fetcher TokenFetchFunc) FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
-	return fetcher(ctx, request)
+func (fetcher TokenFetchFunc) FetchToken(ctx context.Context, url string,
+	request *TokenRequest) (*TokenResponse, error) {
+	return fetcher(ctx, url, request)
 }
 
-func (submitter ReceiptSubmitterFunc) SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey, receipt *models.RCT) (*Response, error) {
+func (submitter ReceiptSubmitterFunc) SubmitReceipt(ctx context.Context, url string,
+	headers *RequestHeaders, privateKey *rsa.PrivateKey, receipt *models.RCT) (
+	*Response, error) {
 	return submitter(ctx, url, headers, privateKey, receipt)
 }
 
-func (submitter ReportSubmitFunc) SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey, report *models.Report) (*Response, error) {
+func (submitter ReportSubmitFunc) SubmitReport(
+	ctx context.Context, url string, headers *RequestHeaders,
+	privateKey *rsa.PrivateKey, report *models.Report,
+) (*Response, error) {
 	return submitter(ctx, url, headers, privateKey, report)
 }
