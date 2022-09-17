@@ -1,0 +1,118 @@
+package vfd
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"time"
+)
+
+// ErrFetchToken is the error returned when the token request fails.
+// It is a wrapper for the underlying error.
+var ErrFetchToken = errors.New("fetch token failed")
+
+type (
+	// TokenRequest contains the request parameters needed to get a token.
+	// GrantType - The type of the grant_type.
+	// Username - The username of the user.
+	// Password - The password of the user.
+	// URL - The URL of the token endpoint.
+	TokenRequest struct {
+		URL       string
+		Username  string
+		Password  string
+		GrantType string
+	}
+
+	// TokenResponse contains the response parameters returned by the token endpoint.
+	TokenResponse struct {
+		Code        string `json:"code,omitempty"`
+		Message     string `json:"message,omitempty"`
+		AccessToken string `json:"access_token,omitempty"`
+		TokenType   string `json:"token_type,omitempty"`
+		ExpiresIn   int64  `json:"expires_in,omitempty"`
+		Error       string `json:"error,omitempty"`
+	}
+)
+
+func Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error) {
+	httpClient := getInstance().http
+
+	return fetchToken(ctx, httpClient, request)
+}
+
+func (c *client) Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error) {
+	httpClient := c.http
+
+	return fetchToken(ctx, httpClient, request)
+}
+
+// fetchToken retrieves a token from the VFD server. If the status code is not 200, an error is returned.
+// It is a context-aware function with a timeout of 1 minute
+func fetchToken(ctx context.Context, client *http.Client, request *TokenRequest) (*TokenResponse, error) {
+	var (
+		path      = request.URL
+		username  = request.Username
+		password  = request.Password
+		grantType = request.GrantType
+	)
+
+	// this request should have a max of 1 Minute timeout
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	defer cancel()
+	var form = url.Values{}
+	form.Set("username", username)
+	form.Set("password", password)
+	form.Set("grant_type", grantType)
+	buffer := bytes.NewBufferString(form.Encode())
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, buffer)
+
+	if err != nil {
+		return nil, fmt.Errorf("%v: %w", ErrFetchToken, err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("http call error: %w: %v", ErrFetchToken, err)
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "token error: could not close response body %v", err)
+		}
+	}(resp.Body)
+
+	out, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %w", ErrFetchToken, err)
+	}
+
+	response := new(TokenResponse)
+
+	if err := json.NewDecoder(bytes.NewBuffer(out)).Decode(response); err != nil {
+		return nil, fmt.Errorf("response decode error: %w", err)
+	}
+
+	response.Code = resp.Header.Get("ACKCODE")
+	response.Message = resp.Header.Get("ACKMSG")
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%w: error code=[%s],message=[%s], error=[%s]",
+			ErrFetchToken, response.Code, response.Message, response.Error)
+	}
+
+	return response, nil
+}
+
+func (tr *TokenResponse) String() string {
+	return fmt.Sprintf("Token Response: [Code=%s,Message=%s,AccessToken=%s,TokenType=%s,ExpiresIn=%d seconds,Error=%s]",
+		tr.Code, tr.Message, tr.AccessToken, tr.TokenType, tr.ExpiresIn, tr.Error)
+}

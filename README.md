@@ -1,2 +1,0 @@
-# vfd
-VFD client
