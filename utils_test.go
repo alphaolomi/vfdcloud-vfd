@@ -1,13 +1,13 @@
 package vfd
 
 import (
-	"github.com/vfdcloud/vfdcloud/pkg/env"
+	"github.com/vfdcloud/base"
 	"testing"
 )
 
 func TestReceiptLink(t *testing.T) {
 	type args struct {
-		e                         env.Env
+		e                         base.Env
 		receiptVerificationNumber string
 		receiptVerificationTime   string
 	}
@@ -19,7 +19,7 @@ func TestReceiptLink(t *testing.T) {
 		{
 			name: "dev receipt link",
 			args: args{
-				e:                         env.STAGING,
+				e:                         base.StagingEnv,
 				receiptVerificationNumber: "123456789",
 				receiptVerificationTime:   "12:00:00",
 			},
@@ -28,7 +28,7 @@ func TestReceiptLink(t *testing.T) {
 		{
 			name: "prod receipt link",
 			args: args{
-				e:                         env.PRODUCTION,
+				e:                         base.ProdEnv,
 				receiptVerificationNumber: "123456789",
 				receiptVerificationTime:   "12:00:00",
 			},

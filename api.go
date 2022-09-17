@@ -8,7 +8,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/vfdcloud/vfdcloud/crypto"
+	"github.com/vfdcloud/base/crypto"
 	"net/http"
 )
 

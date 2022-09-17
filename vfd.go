@@ -4,9 +4,9 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
-	"github.com/vfdcloud/vfdcloud/pkg/env"
-	"github.com/vfdcloud/vfdcloud/vfd/internal"
-	"github.com/vfdcloud/vfdcloud/vfd/models"
+	"github.com/vfdcloud/base"
+	"github.com/vfdcloud/vfd/internal"
+	"github.com/vfdcloud/vfd/models"
 )
 
 const (
@@ -78,9 +78,9 @@ type (
 	}
 )
 
-func FetchPaths(e env.Env) *Paths {
+func FetchPaths(e base.Env) *Paths {
 	var p *Paths
-	if e == env.STAGING {
+	if e == base.StagingEnv {
 		p = &Paths{
 			BaseURL:              StagingBaseURL,
 			APIPath:              StagingApiPath,
@@ -105,10 +105,10 @@ func FetchPaths(e env.Env) *Paths {
 	return p
 }
 
-func (p *Paths) Get(e env.Env, req RequestType) string {
+func (p *Paths) Get(e base.Env, req RequestType) string {
 	switch req {
 	case RequestTypeToken:
-		if e == env.STAGING {
+		if e == base.StagingEnv {
 			return internal.AppendEndpoint(p.BaseURL, "efdmsRctApi", p.TokenEndpoint)
 		}
 
@@ -128,7 +128,7 @@ func (p *Paths) Get(e env.Env, req RequestType) string {
 	}
 }
 
-func GetRequestURL(e env.Env, req RequestType) string {
+func GetRequestURL(e base.Env, req RequestType) string {
 	p := FetchPaths(e)
 
 	return p.Get(e, req)

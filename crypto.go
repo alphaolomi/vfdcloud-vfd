@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha1" //nolint:gosec
 	"fmt"
-	"github.com/vfdcloud/vfdcloud/crypto"
+	"github.com/vfdcloud/base/crypto"
 )
 
 func Sign(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {

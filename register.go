@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/vfdcloud/vfdcloud/vfd/models"
+	"github.com/vfdcloud/vfd/models"
 )
 
 var ErrRegistrationFailed = errors.New("registration failed")

@@ -12,10 +12,7 @@ import (
 	"net/http"
 	"os"
 
-	xio "github.com/vfdcloud/vfdcloud/io"
-	"github.com/vfdcloud/vfdcloud/log"
-
-	"github.com/vfdcloud/vfdcloud/vfd/models"
+	"github.com/vfdcloud/vfd/models"
 )
 
 const (
@@ -117,9 +114,9 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 	// FIXME: remove this line
 	fmt.Sprintf("\n\n\ncertSerial(receipt upload): %s\n\n\n", certSerial)
 
-	log.F(xio.Stdout, "VFD_GATEWAY",
-		"TRACE", log.LevelDebug, "UploadReceipt: ", fmt.Sprintf("%+v", request),
-	)
+	//log.F(xio.Stdout, "VFD_GATEWAY",
+	//	"TRACE", log.LevelDebug, "UploadReceipt: ", fmt.Sprintf("%+v", request),
+	//)
 	pctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -128,7 +125,7 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 		return nil, err
 	}
 
-	log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("UploadReceipt: %s", string(out)))
+	//log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("UploadReceipt: %s", string(out)))
 
 	signedPayload, err := Sign(ctx, privateKey, out)
 	if err != nil {
@@ -144,9 +141,9 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 	if err != nil {
 		return nil, err
 	}
-	outHeader := []byte(xml.Header + string(out))
+	//outHeader := []byte(xml.Header + string(out))
 
-	log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("UploadReceipt: %s", string(outHeader)))
+	//log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("UploadReceipt: %s", string(outHeader)))
 	req, err := http.NewRequestWithContext(pctx, http.MethodPost, requestURL, bytes.NewBuffer(out))
 	if err != nil {
 		return nil, err
@@ -174,7 +171,7 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 	req.Header.Set("Cert-Serial", certSerial)
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
 
-	log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("\n\nHeaders: %+v\n\n", req.Header))
+	//	log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("\n\nHeaders: %+v\n\n", req.Header))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -193,7 +190,7 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 	}
 
 	// Log the response
-	log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, "registration response, status: ", resp.Status, "headers", resp.Header, "body", string(out))
+	//log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, "registration response, status: ", resp.Status, "headers", resp.Header, "body", string(out))
 
 	if resp.StatusCode == 500 {
 		errBody := models.Error{}

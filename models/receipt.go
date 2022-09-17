@@ -64,6 +64,29 @@ type (
 		VATTOTALS  VATTOTALS `xml:"VATTOTALS"`
 	}
 
+	Receipt struct {
+		XMLName         xml.Name  `xml:"RCT"`
+		Text            string    `xml:",chardata"`
+		DATE            string    `xml:"DATE"`
+		TIME            string    `xml:"TIME"`
+		TIN             string    `xml:"TIN"`
+		REGID           string    `xml:"REGID"`
+		EFDSerial       string    `xml:"EFDSERIAL"`
+		CustomerIdType  string    `xml:"CUSTIDTYPE"`
+		CustomerID      string    `xml:"CUSTID"`
+		CustomerName    string    `xml:"CUSTNAME"`
+		MobileNum       string    `xml:"MOBILENUM"`
+		Number          string    `xml:"RCTNUM"`
+		DC              string    `xml:"DC"`
+		GC              string    `xml:"GC"`
+		ZNum            string    `xml:"ZNUM"`
+		VerificationNum string    `xml:"RCTVNUM"`
+		ITEMS           ITEMS     `xml:"ITEMS"`
+		TOTALS          TOTALS    `xml:"TOTALS"`
+		PAYMENTS        PAYMENT   `xml:"PAYMENTS"`
+		VATTOTALS       VATTOTALS `xml:"VATTOTALS"`
+	}
+
 	PAYMENT struct {
 		XMLName   xml.Name `xml:"PAYMENTS"`
 		Text      string   `xml:",chardata"`
@@ -74,7 +97,7 @@ type (
 	ITEMS struct {
 		XMLName xml.Name `xml:"ITEMS"`
 		Text    string   `xml:",chardata"`
-		ITEM    []ITEM  `xml:"ITEM"`
+		ITEM    []ITEM   `xml:"ITEM"`
 	}
 
 	ITEM struct {

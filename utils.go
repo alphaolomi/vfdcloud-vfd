@@ -2,7 +2,7 @@ package vfd
 
 import (
 	"fmt"
-	"github.com/vfdcloud/vfdcloud/pkg/env"
+	"github.com/vfdcloud/base"
 	"strings"
 )
 
@@ -12,10 +12,10 @@ const (
 )
 
 // ReceiptLink creates a link to the receipt
-func ReceiptLink(e env.Env, receiptVerificationNumber, receiptVerificationTime string) string {
+func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime string) string {
 	var baseURL string
 
-	if e == env.PRODUCTION {
+	if e == base.ProdEnv {
 		baseURL = prodReceiptBaseURL
 	} else {
 		baseURL = devReceiptBaseURL

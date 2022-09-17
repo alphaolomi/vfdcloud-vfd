@@ -1,0 +1,4 @@
+github.com/vfdcloud/base v0.0.0-20220917153402-0b7856e3d815 h1:BIKT9PdJQ94cJDehRsw6k0bnnJwbtJV54mz7WuEh7iY=
+github.com/vfdcloud/base v0.0.0-20220917153402-0b7856e3d815/go.mod h1:9k8nQP8wJ29W+FX/4Rr3Sx0qq670KLjUXuxxEshtPOY=
+golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 h1:Y/gsMcFOcR+6S6f3YeMKl5g+dZMEWqcz5Czj/GWYbkM=
+golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=

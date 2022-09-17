@@ -1,14 +1,14 @@
 package vfd
 
 import (
-	"github.com/vfdcloud/vfdcloud/pkg/env"
+	"github.com/vfdcloud/base"
 	"testing"
 )
 
 func TestGetRequestURL(t *testing.T) {
 	t.Parallel()
 	type args struct {
-		e   env.Env
+		e   base.Env
 		req RequestType
 	}
 	tests := []struct {
@@ -19,7 +19,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "staging registration",
 			args: args{
-				e:   env.STAGING,
+				e:   base.StagingEnv,
 				req: RequestTypeRegister,
 			},
 			want: "https://virtual.tra.go.tz/efdmsRctApi/api/vfdRegReq",
@@ -27,7 +27,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "staging token",
 			args: args{
-				e:   env.STAGING,
+				e:   base.StagingEnv,
 				req: RequestTypeToken,
 			},
 			want: "https://virtual.tra.go.tz/efdmsRctApi/vfdtoken",
@@ -35,7 +35,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "staging receipt",
 			args: args{
-				e:   env.STAGING,
+				e:   base.StagingEnv,
 				req: RequestTypeReceipt,
 			},
 			want: "https://virtual.tra.go.tz/efdmsRctApi/api/efdmsRctInfo",
@@ -43,7 +43,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "staging report",
 			args: args{
-				e:   env.STAGING,
+				e:   base.StagingEnv,
 				req: RequestTypeReport,
 			},
 			want: "https://virtual.tra.go.tz/efdmsRctApi/api/efdmszreport",
@@ -51,7 +51,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "production registration",
 			args: args{
-				e:   env.PRODUCTION,
+				e:   base.ProdEnv,
 				req: RequestTypeRegister,
 			},
 			want: "https://vfd.tra.go.tz/api/vfdRegReq",
@@ -59,7 +59,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "production token",
 			args: args{
-				e:   env.PRODUCTION,
+				e:   base.ProdEnv,
 				req: RequestTypeToken,
 			},
 			want: "https://vfd.tra.go.tz/vfdtoken",
@@ -67,7 +67,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "production receipt",
 			args: args{
-				e:   env.PRODUCTION,
+				e:   base.ProdEnv,
 				req: RequestTypeReceipt,
 			},
 			want: "https://vfd.tra.go.tz/api/efdmsRctInfo",
@@ -75,7 +75,7 @@ func TestGetRequestURL(t *testing.T) {
 		{
 			name: "production report",
 			args: args{
-				e:   env.PRODUCTION,
+				e:   base.ProdEnv,
 				req: RequestTypeReport,
 			},
 			want: "https://vfd.tra.go.tz/api/efdmszreport",
