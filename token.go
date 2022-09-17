@@ -22,9 +22,7 @@ type (
 	// GrantType - The type of the grant_type.
 	// Username - The username of the user.
 	// Password - The password of the user.
-	// URL - The URL of the token endpoint.
 	TokenRequest struct {
-		URL       string
 		Username  string
 		Password  string
 		GrantType string
@@ -52,10 +50,10 @@ func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenR
 	return fetchToken(ctx, httpClient, url, request)
 }
 
-func (c *httpx) Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error) {
+func (c *httpx) Token(ctx context.Context, requestUrl string, request *TokenRequest) (*TokenResponse, error) {
 	httpClient := c.client
 
-	return fetchToken(ctx, httpClient, request.URL, request)
+	return fetchToken(ctx, httpClient, requestUrl, request)
 }
 
 // fetchToken retrieves a token from the VFD server. If the status code is not 200, an error is returned.

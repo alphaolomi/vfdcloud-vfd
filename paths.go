@@ -16,18 +16,6 @@ const (
 )
 
 const (
-	ProductionBaseURL         = "https://vfd.tra.go.tz/"
-	ProductionApiPath         = "/api/"
-	StagingApiPath            = "/efdmsRctApi/api/"
-	StagingBaseURL            = "https://virtual.tra.go.tz/"
-	TokenEndpoint             = "/vfdtoken"
-	RegistrationEndpoint      = "/vfdRegReq"
-	ReceiptEndpoint           = "/efdmsRctInfo"
-	ReportEndpoint            = "/efdmszreport"
-	StagingVerificationURL    = "https://virtual.tra.go.tz/efdmsRctVerify/"
-	ProductionVerificationURL = "https://verify.tra.go.tz/"
-)
-const (
 	RegisterClientAction      Action = "register"
 	FetchTokenAction          Action = "token"
 	UploadReceiptAction       Action = "receipt"
@@ -38,90 +26,53 @@ const (
 type (
 	Action string
 
-	URL struct {
-		RegisterURL string
-		TokenURL    string
-		ReceiptURL  string
-		ReportURL   string
-		VerifyURL   string
-	}
-
-	Paths struct {
-		BaseURL              string
-		APIPath              string
-		RegistrationEndpoint string
-		TokenEndpoint        string
-		ReceiptEndpoint      string
-		ReportEndpoint       string
-		VerificationURL      string
+	RequestURL struct {
+		Registration  string
+		FetchToken    string
+		SubmitReceipt string
+		SubmitReport  string
+		VerifyReceipt string
 	}
 )
 
 var (
-	productionURLs = &URL{
-		RegisterURL: RegisterURLProd,
-		TokenURL:    TokenURLProd,
-		ReceiptURL:  ReceiptURLProd,
-		ReportURL:   ReportURLProd,
-		VerifyURL:   VerifyURLProd,
+	productionURLs = &RequestURL{
+		Registration:  RegisterURLProd,
+		FetchToken:    TokenURLProd,
+		SubmitReceipt: ReceiptURLProd,
+		SubmitReport:  ReportURLProd,
+		VerifyReceipt: VerifyURLProd,
 	}
 
-	stagingURLs = &URL{
-		RegisterURL: RegisterURLTest,
-		TokenURL:    TokenURLTest,
-		ReceiptURL:  ReceiptURLTest,
-		ReportURL:   ReportURLTest,
-		VerifyURL:   VerifyURLTest,
+	stagingURLs = &RequestURL{
+		Registration:  RegisterURLTest,
+		FetchToken:    TokenURLTest,
+		SubmitReceipt: ReceiptURLTest,
+		SubmitReport:  ReportURLTest,
+		VerifyReceipt: VerifyURLTest,
 	}
 )
 
 func GetURL(e base.Env, action Action) string {
-	var u *URL
-	if e == base.StagingEnv {
-		u = stagingURLs
-	} else {
+	var u *RequestURL
+	if e == base.ProdEnv {
 		u = productionURLs
+	} else {
+		u = stagingURLs
 	}
 
 	switch action {
 	case RegisterClientAction:
-		return u.RegisterURL
+		return u.Registration
 	case FetchTokenAction:
-		return u.TokenURL
+		return u.FetchToken
 	case UploadReceiptAction:
-		return u.ReceiptURL
+		return u.SubmitReceipt
 	case UploadReportAction:
-		return u.ReportURL
+		return u.SubmitReport
 	case ReceiptVerificationAction:
-		return u.VerifyURL
+		return u.VerifyReceipt
 	default:
 		return ""
 	}
-}
-
-func FetchPaths(e base.Env) *Paths {
-	var p *Paths
-	if e == base.StagingEnv {
-		p = &Paths{
-			BaseURL:              StagingBaseURL,
-			APIPath:              StagingApiPath,
-			RegistrationEndpoint: RegistrationEndpoint,
-			TokenEndpoint:        TokenEndpoint,
-			ReceiptEndpoint:      ReceiptEndpoint,
-			ReportEndpoint:       ReportEndpoint,
-			VerificationURL:      StagingVerificationURL,
-		}
-	} else {
-		p = &Paths{
-			BaseURL:              ProductionBaseURL,
-			APIPath:              ProductionApiPath,
-			RegistrationEndpoint: RegistrationEndpoint,
-			TokenEndpoint:        TokenEndpoint,
-			ReceiptEndpoint:      ReceiptEndpoint,
-			ReportEndpoint:       ReportEndpoint,
-			VerificationURL:      ProductionVerificationURL,
-		}
-	}
-
-	return p
 }
