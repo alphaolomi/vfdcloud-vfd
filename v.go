@@ -38,21 +38,91 @@ type (
 		Code    int64  `json:"code,omitempty"`
 		Message string `json:"message,omitempty"`
 	}
+
 	// LoadCertFunc is a function that loads a certificate from a pfx file from the given path.
 	// returns the private key and the certificate.
-	LoadCertFunc        func(ctx context.Context, certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, error)
-	VerifySignatureFunc func(ctx context.Context, publicKey *rsa.PublicKey, payload []byte, signature string) error
-	SignPayloadFunc     func(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte) ([]byte, error)
+	LoadCertFunc func(
+		ctx context.Context, certPath string, certPassword string) (
+		*rsa.PrivateKey, *x509.Certificate, error,
+	)
+
+	VerifySignatureFunc func(
+		ctx context.Context, publicKey *rsa.PublicKey,
+		payload []byte, signature string) error
+
+	SignPayloadFunc func(
+		ctx context.Context, privateKey *rsa.PrivateKey,
+		payload []byte) ([]byte, error)
+
+	RegisterClientFunc func(
+		ctx context.Context, request *RegistrationRequest,
+	) (*RegistrationResponse, error)
+
+	TokenFetchFunc func(
+		ctx context.Context, request *TokenRequest,
+	) (*TokenResponse, error)
+
+	ReportSubmitFunc func(
+		ctx context.Context,
+		url string,
+		headers *RequestHeaders,
+		privateKey *rsa.PrivateKey,
+		request *models.Report,
+	) (*Response, error)
+
+	ReceiptSubmitterFunc func(
+		ctx context.Context, url string, headers *RequestHeaders,
+		privateKey *rsa.PrivateKey, receipt *models.RCT,
+	) (*Response, error)
 
 	Service interface {
-		RegisterClient(ctx context.Context, request *RegistrationRequest) (*RegistrationResponse, error)
-		Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error)
-		SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey, receipt *models.RCT) (*Response, error)
-		SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey, report *models.Report) (*Response, error)
+		Register(
+			ctx context.Context,
+			request *RegistrationRequest,
+		) (*RegistrationResponse, error)
+		FetchToken(
+			ctx context.Context,
+			url string,
+			request *TokenRequest,
+		) (*TokenResponse, error)
+		SubmitReceipt(
+			ctx context.Context,
+			url string,
+			headers *RequestHeaders,
+			privateKey *rsa.PrivateKey,
+			receipt *models.RCT,
+		) (*Response, error)
+
+		SubmitReport(
+			ctx context.Context,
+			url string,
+			headers *RequestHeaders,
+			privateKey *rsa.PrivateKey,
+			report *models.Report,
+		) (*Response, error)
+	}
+
+	Registrar interface {
+		Register(ctx context.Context, request *RegistrationRequest) (*RegistrationResponse, error)
+	}
+
+	TokenFetcher interface {
+		FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error)
+	}
+
+	ReceiptSubmitter interface {
+		SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+			receipt *models.RCT) (*Response, error)
+	}
+
+	ReportSubmitter interface {
+		SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+			report *models.Report) (*Response, error)
 	}
 )
 
-func LoadCert(ctx context.Context, certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, error) {
+func LoadCert(ctx context.Context, certPath string, certPassword string) (
+	*rsa.PrivateKey, *x509.Certificate, error) {
 	_, cancel := context.WithCancel(ctx)
 	defer cancel()
 	return crypto.ParsePfxCertificate(certPath, certPassword)
@@ -91,4 +161,20 @@ func SignPayload(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte
 	}
 
 	return out, nil
+}
+
+func (registrar RegisterClientFunc) Register(ctx context.Context, request *RegistrationRequest) (*RegistrationResponse, error) {
+	return registrar(ctx, request)
+}
+
+func (fetcher TokenFetchFunc) FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
+	return fetcher(ctx, request)
+}
+
+func (submitter ReceiptSubmitterFunc) SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey, receipt *models.RCT) (*Response, error) {
+	return submitter(ctx, url, headers, privateKey, receipt)
+}
+
+func (submitter ReportSubmitFunc) SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey, report *models.Report) (*Response, error) {
+	return submitter(ctx, url, headers, privateKey, report)
 }
