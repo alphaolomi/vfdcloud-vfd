@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	_                    API = (*client)(nil)
+	_                    API = (*httpx)(nil)
 	ErrSignatureMismatch     = errors.New("signature mismatch")
 
 	ErrReportUploadFailed = errors.New("report upload failed")
@@ -25,7 +25,7 @@ type (
 	ResponseInterceptor func(response *http.Response)
 )
 
-func (c *client) LoadCert(ctx context.Context, certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, error) {
+func (c *httpx) LoadCert(ctx context.Context, certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -33,7 +33,7 @@ func (c *client) LoadCert(ctx context.Context, certPath string, certPassword str
 
 }
 
-func (c *client) VerifySignature(ctx context.Context, publicKey *rsa.PublicKey, payload []byte, signature string) error {
+func (c *httpx) VerifySignature(ctx context.Context, publicKey *rsa.PublicKey, payload []byte, signature string) error {
 	_, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -51,7 +51,7 @@ func (c *client) VerifySignature(ctx context.Context, publicKey *rsa.PublicKey, 
 	return nil
 }
 
-func (c *client) SignPayload(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {
+func (c *httpx) SignPayload(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 

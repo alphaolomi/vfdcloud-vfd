@@ -41,23 +41,27 @@ type (
 	}
 )
 
-func Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error) {
-	httpClient := getInstance().http
+// FetchToken retrieves a token from the VFD server. If the status code is not 200, an error is returned.
+// Error Message will contain TokenResponse.Code and TokenResponse.Message
+// fetchToken uses an internal client httpx with a timeout of 70 seconds.
+// It is advised to call this only when the previous token has expired. It will still work if called before
+// the token expires.
+func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
+	httpClient := httpClientInstance().client
 
-	return fetchToken(ctx, httpClient, request)
+	return fetchToken(ctx, httpClient, url, request)
 }
 
-func (c *client) Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error) {
-	httpClient := c.http
+func (c *httpx) Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error) {
+	httpClient := c.client
 
-	return fetchToken(ctx, httpClient, request)
+	return fetchToken(ctx, httpClient, request.URL, request)
 }
 
 // fetchToken retrieves a token from the VFD server. If the status code is not 200, an error is returned.
 // It is a context-aware function with a timeout of 1 minute
-func fetchToken(ctx context.Context, client *http.Client, request *TokenRequest) (*TokenResponse, error) {
+func fetchToken(ctx context.Context, client *http.Client, path string, request *TokenRequest) (*TokenResponse, error) {
 	var (
-		path      = request.URL
 		username  = request.Username
 		password  = request.Password
 		grantType = request.GrantType
@@ -80,7 +84,7 @@ func fetchToken(ctx context.Context, client *http.Client, request *TokenRequest)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http call error: %w: %v", ErrFetchToken, err)
+		return nil, fmt.Errorf("client call error: %w: %v", ErrFetchToken, err)
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -113,6 +117,6 @@ func fetchToken(ctx context.Context, client *http.Client, request *TokenRequest)
 }
 
 func (tr *TokenResponse) String() string {
-	return fmt.Sprintf("Token Response: [Code=%s,Message=%s,AccessToken=%s,TokenType=%s,ExpiresIn=%d seconds,Error=%s]",
+	return fmt.Sprintf("FetchToken Response: [Code=%s,Message=%s,AccessToken=%s,TokenType=%s,ExpiresIn=%d seconds,Error=%s]",
 		tr.Code, tr.Message, tr.AccessToken, tr.TokenType, tr.ExpiresIn, tr.Error)
 }

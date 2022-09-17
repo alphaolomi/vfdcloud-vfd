@@ -89,8 +89,8 @@ func (idType CUSTIDTYPE) String() string {
 
 var ErrReceiptUploadFailed = errors.New("receipt upload failed")
 
-func (c *client) UploadReceipt(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*ReceiptResponse, error) {
-	client := c.http
+func (c *httpx) UploadReceipt(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*ReceiptResponse, error) {
+	client := c.client
 
 	return receiptUpload(ctx, client, request, rct)
 }

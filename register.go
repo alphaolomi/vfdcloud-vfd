@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/rsa"
-	"encoding/base64"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -61,11 +60,11 @@ type (
 	}
 )
 
-func Register(ctx context.Context, request *RegistrationRequest) (*models.RegistrationResponse, error) {
-	return register(ctx, getInstance().http, request)
+func RegisterClient(ctx context.Context, url string, request *RegistrationRequest) (*models.RegistrationResponse, error) {
+	return register(ctx, httpClientInstance().client, url, request)
 }
 
-func (c *client) Register(ctx context.Context, request *RegistrationRequest) (*models.RegistrationResponse, error) {
+func (c *httpx) Register(ctx context.Context, request *RegistrationRequest) (*models.RegistrationResponse, error) {
 	//reg := models.RegistrationBody{
 	//	TIN:     request.Tin,
 	//	CERTKEY: request.CertKey,
@@ -92,17 +91,17 @@ func (c *client) Register(ctx context.Context, request *RegistrationRequest) (*m
 	//	return nil, err
 	//}
 	//
-	//req, err := http.NewRequest(http.MethodPost, path, bytes.NewBuffer(out))
+	//req, err := client.NewRequest(client.MethodPost, path, bytes.NewBuffer(out))
 	//if err != nil {
 	//	return nil, err
 	//}
 	//req.Header.Set("Content-Type", request.ContentType)
 	//req.Header.Set("Cert-Serial", request.CertSerial)
-	//req.Header.Set("client", request.client)
+	//req.Header.Set("httpx", request.httpx)
 	//
-	//resp, err := c.http.StandardClient().Do(req)
+	//resp, err := c.client.StandardClient().Do(req)
 	//if err != nil {
-	//	return nil, fmt.Errorf("http error: %v: %w", ErrRegistrationFailed, err)
+	//	return nil, fmt.Errorf("client error: %v: %w", ErrRegistrationFailed, err)
 	//}
 	//
 	//defer func(Body io.ReadCloser) {
@@ -145,20 +144,19 @@ func (c *client) Register(ctx context.Context, request *RegistrationRequest) (*m
 	//return response, nil
 
 	var (
-		client = c.http
+		client = c.client
 	)
 
-	return register(ctx, client, request)
+	return register(ctx, client, request.URL, request)
 }
 
-func register(ctx context.Context, client *http.Client, request *RegistrationRequest) (*models.RegistrationResponse, error) {
+func register(ctx context.Context, client *http.Client, requestURL string, request *RegistrationRequest) (*models.RegistrationResponse, error) {
 	var (
-		requestURL  = request.URL
 		taxIdNumber = request.Tin
 		certKey     = request.CertKey
 		privateKey  = request.PrivateKey
 		apiClient   = request.Client
-		certSerial  = base64.StdEncoding.EncodeToString([]byte(request.CertSerial))
+		certSerial  = EncodeBase64String(request.CertSerial)
 		contentType = request.ContentType
 	)
 
@@ -177,7 +175,7 @@ func register(ctx context.Context, client *http.Client, request *RegistrationReq
 		return nil, err
 	}
 
-	signedPayloadBase64 := base64.StdEncoding.EncodeToString(signedPayload)
+	signedPayloadBase64 := EncodeBase64Bytes(signedPayload)
 	requestPayload := models.RegistrationRequest{
 		Reg:            reg,
 		EFDMSSIGNATURE: signedPayloadBase64,
@@ -198,7 +196,7 @@ func register(ctx context.Context, client *http.Client, request *RegistrationReq
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http error: %v: %w", ErrRegistrationFailed, err)
+		return nil, fmt.Errorf("client error: %v: %w", ErrRegistrationFailed, err)
 	}
 
 	defer func(Body io.ReadCloser) {

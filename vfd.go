@@ -54,7 +54,7 @@ const (
 
 type (
 
-	// API is an interface for the VFD API client. The interface should not hide some sort of state
+	// API is an interface for the VFD API httpx. The interface should not hide some sort of state
 	// that the implementation may need to maintain. The Ideal implementation should be stateless.
 	// Hence, the interface should not hide details of the implementation.
 	API interface {

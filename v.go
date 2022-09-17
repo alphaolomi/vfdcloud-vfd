@@ -55,7 +55,9 @@ type (
 		payload []byte) ([]byte, error)
 
 	RegisterClientFunc func(
-		ctx context.Context, request *RegistrationRequest,
+		ctx context.Context,
+		url string,
+		request *RegistrationRequest,
 	) (*RegistrationResponse, error)
 
 	TokenFetchFunc func(
@@ -78,6 +80,7 @@ type (
 	Service interface {
 		Register(
 			ctx context.Context,
+			url string,
 			request *RegistrationRequest,
 		) (*RegistrationResponse, error)
 		FetchToken(
@@ -103,7 +106,7 @@ type (
 	}
 
 	Registrar interface {
-		Register(ctx context.Context, request *RegistrationRequest) (*RegistrationResponse, error)
+		Register(ctx context.Context, url string, request *RegistrationRequest) (*RegistrationResponse, error)
 	}
 
 	TokenFetcher interface {
@@ -165,9 +168,9 @@ func SignPayload(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte
 	return out, nil
 }
 
-func (registrar RegisterClientFunc) Register(ctx context.Context, request *RegistrationRequest) (
-	*RegistrationResponse, error) {
-	return registrar(ctx, request)
+func (registrar RegisterClientFunc) Register(ctx context.Context, url string,
+	request *RegistrationRequest) (*RegistrationResponse, error) {
+	return registrar(ctx, url, request)
 }
 
 func (fetcher TokenFetchFunc) FetchToken(ctx context.Context, url string,

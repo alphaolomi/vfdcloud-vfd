@@ -13,36 +13,38 @@ const (
 )
 
 type (
-	client struct {
-		http *http.Client
+	// httpx is a wrapper for the http.Client that is used internally to make
+	// http requests to the VFD server.
+	httpx struct {
+		client *http.Client
 	}
 )
 
 var (
 	once     sync.Once
-	instance *client
+	instance *httpx
 )
 
-func getInstance() *client {
+func httpClientInstance() *httpx {
 
 	once.Do(func() {
-		instance = makeClient()
+		instance = defaultHTTPClient()
 	})
 
 	return instance
 }
 
-func makeClient() *client {
+func defaultHTTPClient() *httpx {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.MaxIdleConns = 100
 	t.MaxConnsPerHost = 100
 	t.MaxIdleConnsPerHost = 100
 	httpClient := &http.Client{
-		Timeout:   60 * time.Second,
+		Timeout:   70 * time.Second,
 		Transport: t,
 	}
-	c := &client{
-		http: httpClient,
+	c := &httpx{
+		client: httpClient,
 	}
 
 	return c
