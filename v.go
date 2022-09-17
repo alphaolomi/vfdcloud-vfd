@@ -60,10 +60,6 @@ type (
 		request *RegistrationRequest,
 	) (*RegistrationResponse, error)
 
-	TokenFetchFunc func(
-		ctx context.Context, url string, request *TokenRequest,
-	) (*TokenResponse, error)
-
 	ReportSubmitFunc func(
 		ctx context.Context,
 		url string,
@@ -169,7 +165,7 @@ func (registrar RegisterClientFunc) Register(ctx context.Context, url string,
 	return registrar(ctx, url, request)
 }
 
-func (fetcher TokenFetchFunc) FetchToken(ctx context.Context, url string,
+func (fetcher TokenFetcher) FetchToken(ctx context.Context, url string,
 	request *TokenRequest) (*TokenResponse, error) {
 	return fetcher(ctx, url, request)
 }
