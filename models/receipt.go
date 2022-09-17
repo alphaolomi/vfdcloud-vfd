@@ -27,10 +27,10 @@ type (
 	RCTACK struct {
 		XMLName xml.Name `xml:"RCTACK"`
 		Text    string   `xml:",chardata"`
-		RCTNUM  string   `xml:"RCTNUM"`
+		RCTNUM  int64    `xml:"RCTNUM"`
 		DATE    string   `xml:"DATE"`
 		TIME    string   `xml:"TIME"`
-		ACKCODE string   `xml:"ACKCODE"`
+		ACKCODE int64    `xml:"ACKCODE"`
 		ACKMSG  string   `xml:"ACKMSG"`
 	}
 

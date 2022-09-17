@@ -68,11 +68,6 @@ type (
 		request *models.Report,
 	) (*Response, error)
 
-	ReceiptSubmitterFunc func(
-		ctx context.Context, url string, headers *RequestHeaders,
-		privateKey *rsa.PrivateKey, receipt *models.RCT,
-	) (*Response, error)
-
 	Service interface {
 		Register(
 			ctx context.Context,
@@ -103,12 +98,6 @@ type (
 
 	Registrar interface {
 		Register(ctx context.Context, url string, request *RegistrationRequest) (*RegistrationResponse, error)
-	}
-
-	ReceiptSubmitter interface {
-		SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders,
-			privateKey *rsa.PrivateKey,
-			receipt *models.RCT) (*Response, error)
 	}
 
 	ReportSubmitter interface {
@@ -168,12 +157,6 @@ func (registrar RegisterClientFunc) Register(ctx context.Context, url string,
 func (fetcher TokenFetcher) FetchToken(ctx context.Context, url string,
 	request *TokenRequest) (*TokenResponse, error) {
 	return fetcher(ctx, url, request)
-}
-
-func (submitter ReceiptSubmitterFunc) SubmitReceipt(ctx context.Context, url string,
-	headers *RequestHeaders, privateKey *rsa.PrivateKey, receipt *models.RCT) (
-	*Response, error) {
-	return submitter(ctx, url, headers, privateKey, receipt)
 }
 
 func (submitter ReportSubmitFunc) SubmitReport(

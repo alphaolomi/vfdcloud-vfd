@@ -72,7 +72,7 @@ func wrapTokenFetcherMiddlewares(fetcher TokenFetcher, mw ...TokenFetcherMiddlew
 // work if called before the token expires.
 // It is a context-aware function with a timeout of 1 minute. Middlewares can be passed to wrap the
 // fetcher with additional functionality. The middlewares are executed in the order they are passed.
-func FetchToken(ctx context.Context, url string, request *TokenRequest, mw ...TokenFetcherMiddleware) (
+func FetchToken(ctx context.Context, url string, request *TokenRequest, mw []TokenFetcherMiddleware) (
 	*TokenResponse, error) {
 	f := func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
 		httpClient := httpClientInstance().client
