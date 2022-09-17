@@ -109,10 +109,6 @@ type (
 		Register(ctx context.Context, url string, request *RegistrationRequest) (*RegistrationResponse, error)
 	}
 
-	TokenFetcher interface {
-		FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error)
-	}
-
 	ReceiptSubmitter interface {
 		SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders,
 			privateKey *rsa.PrivateKey,

@@ -37,7 +37,34 @@ type (
 		ExpiresIn   int64  `json:"expires_in,omitempty"`
 		Error       string `json:"error,omitempty"`
 	}
+
+	// TokenFetcher is an interface that fetches a token from the VFD Service
+	// using the given url and the token request.
+	// If the response status code is not 200, an error is returned.
+	// The error message will contain the TokenResponse.Code and TokenResponse.Message
+	// fields.
+	TokenFetcher interface {
+		FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error)
+	}
+
+	TokenFetcherMiddleware func(fetcher TokenFetchFunc) TokenFetchFunc
 )
+
+func FetchTokenMiddleware(mw ...TokenFetcherMiddleware) TokenFetchFunc {
+	fetcher := TokenFetchFunc(FetchToken)
+	// Loop backwards through the middleware invoking each one. Replace the
+	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
+	// first middleware of the slice is the first to be executed by requests.
+	for i := len(mw) - 1; i >= 0; i-- {
+		h := mw[i]
+		if h != nil {
+			fetcher = h(fetcher)
+		}
+	}
+
+	return fetcher
+
+}
 
 // FetchToken retrieves a token from the VFD server. If the status code is not 200, an error is returned.
 // Error Message will contain TokenResponse.Code and TokenResponse.Message
