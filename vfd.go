@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
-	"github.com/vfdcloud/base"
-	"github.com/vfdcloud/vfd/internal"
 	"github.com/vfdcloud/vfd/models"
 )
 
@@ -55,32 +53,3 @@ type (
 
 	RequestType string
 )
-
-func (p *Paths) Get(e base.Env, req RequestType) string {
-	switch req {
-	case RequestTypeToken:
-		if e == base.StagingEnv {
-			return internal.AppendEndpoint(p.BaseURL, "efdmsRctApi", p.TokenEndpoint)
-		}
-
-		return internal.AppendEndpoint(p.BaseURL, p.TokenEndpoint)
-
-	case RequestTypeRegister:
-		return internal.AppendEndpoint(p.BaseURL, p.APIPath, p.RegistrationEndpoint)
-
-	case RequestTypeReceipt:
-		return internal.AppendEndpoint(p.BaseURL, p.APIPath, p.ReceiptEndpoint)
-
-	case RequestTypeReport:
-		return internal.AppendEndpoint(p.BaseURL, p.APIPath, p.ReportEndpoint)
-
-	default:
-		return ""
-	}
-}
-
-func GetRequestURL(e base.Env, req RequestType) string {
-	p := FetchPaths(e)
-
-	return p.Get(e, req)
-}

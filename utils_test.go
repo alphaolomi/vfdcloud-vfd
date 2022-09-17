@@ -6,6 +6,7 @@ import (
 )
 
 func TestReceiptLink(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		e                         base.Env
 		receiptVerificationNumber string
@@ -36,7 +37,9 @@ func TestReceiptLink(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := ReceiptLink(tt.args.e, tt.args.receiptVerificationNumber, tt.args.receiptVerificationTime); got != tt.want {
 				t.Errorf("ReceiptLink() = %v, want %v", got, tt.want)
 			}

@@ -13,8 +13,7 @@ import (
 )
 
 var (
-	_                    API = (*httpx)(nil)
-	ErrSignatureMismatch     = errors.New("signature mismatch")
+	ErrSignatureMismatch = errors.New("signature mismatch")
 
 	ErrReportUploadFailed = errors.New("report upload failed")
 )
