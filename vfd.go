@@ -39,19 +39,6 @@ const (
 	RequestTypeReport   = RequestType("REPORT UPLOAD")
 )
 
-const (
-	ProductionBaseURL         = "https://vfd.tra.go.tz/"
-	ProductionApiPath         = "/api/"
-	StagingApiPath            = "/efdmsRctApi/api/"
-	StagingBaseURL            = "https://virtual.tra.go.tz/"
-	TokenEndpoint             = "/vfdtoken"
-	RegistrationEndpoint      = "/vfdRegReq"
-	ReceiptEndpoint           = "/efdmsRctInfo"
-	ReportEndpoint            = "/efdmszreport"
-	StagingVerificationURL    = "https://virtual.tra.go.tz/efdmsRctVerify/"
-	ProductionVerificationURL = "https://verify.tra.go.tz/"
-)
-
 type (
 
 	// API is an interface for the VFD API httpx. The interface should not hide some sort of state
@@ -67,43 +54,7 @@ type (
 	}
 
 	RequestType string
-	Paths       struct {
-		BaseURL              string
-		APIPath              string
-		RegistrationEndpoint string
-		TokenEndpoint        string
-		ReceiptEndpoint      string
-		ReportEndpoint       string
-		VerificationURL      string
-	}
 )
-
-func FetchPaths(e base.Env) *Paths {
-	var p *Paths
-	if e == base.StagingEnv {
-		p = &Paths{
-			BaseURL:              StagingBaseURL,
-			APIPath:              StagingApiPath,
-			RegistrationEndpoint: RegistrationEndpoint,
-			TokenEndpoint:        TokenEndpoint,
-			ReceiptEndpoint:      ReceiptEndpoint,
-			ReportEndpoint:       ReportEndpoint,
-			VerificationURL:      StagingVerificationURL,
-		}
-	} else {
-		p = &Paths{
-			BaseURL:              ProductionBaseURL,
-			APIPath:              ProductionApiPath,
-			RegistrationEndpoint: RegistrationEndpoint,
-			TokenEndpoint:        TokenEndpoint,
-			ReceiptEndpoint:      ReceiptEndpoint,
-			ReportEndpoint:       ReportEndpoint,
-			VerificationURL:      ProductionVerificationURL,
-		}
-	}
-
-	return p
-}
 
 func (p *Paths) Get(e base.Env, req RequestType) string {
 	switch req {

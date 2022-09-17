@@ -7,19 +7,14 @@ import (
 	"strings"
 )
 
-const (
-	prodReceiptBaseURL = "https://verify.tra.go.tz/"
-	devReceiptBaseURL  = "https://virtual.tra.go.tz/efdmsRctVerify/"
-)
-
 // ReceiptLink creates a link to the receipt
 func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime string) string {
 	var baseURL string
 
 	if e == base.ProdEnv {
-		baseURL = prodReceiptBaseURL
+		baseURL = VerifyURLProd
 	} else {
-		baseURL = devReceiptBaseURL
+		baseURL = VerifyURLTest
 	}
 	return receiptLink(baseURL, receiptVerificationNumber, receiptVerificationTime)
 }
