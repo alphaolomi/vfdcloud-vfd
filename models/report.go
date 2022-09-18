@@ -6,6 +6,24 @@ import (
 )
 
 type (
+	// ZACK is the Z report acknowledge received from vfd server after
+	// successfully Z report upload request
+	ZACK struct {
+		XMLName xml.Name `xml:"ZACK"`
+		Text    string   `xml:",chardata"`
+		ZNUMBER int64    `xml:"ZNUMBER"`
+		DATE    string   `xml:"DATE"`
+		TIME    string   `xml:"TIME"`
+		ACKCODE int64    `xml:"ACKCODE"`
+		ACKMSG  string   `xml:"ACKMSG"`
+	}
+
+	ReportAckEFDMS struct {
+		XMLName        xml.Name `xml:"EFDMS"`
+		Text           string   `xml:",chardata"`
+		ZACK           ZACK     `xml:"ZACK"`
+		EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
+	}
 	ReportEFDMS struct {
 		XMLName        xml.Name `xml:"EFDMS"`
 		Text           string   `xml:",chardata"`
@@ -15,7 +33,6 @@ type (
 	// Lines ...
 	Lines struct {
 		Name    string
-		Address string
 		Street  string
 		Mobile  string
 		City    string
@@ -28,7 +45,7 @@ type (
 func (lines *Lines) List() []string {
 	return []string{
 		lines.Name,
-		fmt.Sprintf("%s,%s", lines.Address, lines.Street),
+		lines.Street,
 		lines.Mobile,
 		fmt.Sprintf("%s,%s", lines.City, lines.Country)}
 }

@@ -104,18 +104,18 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 		return nil, fmt.Errorf("registration error: %s", errBody.Message)
 	}
 
-	response := models.RCTACKEFDMS{}
+	response := models.ReportAckEFDMS{}
 	err = xml.NewDecoder(bytes.NewBuffer(out)).Decode(&response)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReportSubmitFailed, err)
 	}
 
 	return &Response{
-		Number:  response.RCTACK.RCTNUM,
-		Date:    response.RCTACK.DATE,
-		Time:    response.RCTACK.TIME,
-		Code:    response.RCTACK.ACKCODE,
-		Message: response.RCTACK.ACKMSG,
+		Number:  response.ZACK.ZNUMBER,
+		Date:    response.ZACK.DATE,
+		Time:    response.ZACK.TIME,
+		Code:    response.ZACK.ACKCODE,
+		Message: response.ZACK.ACKMSG,
 	}, nil
 }
 
