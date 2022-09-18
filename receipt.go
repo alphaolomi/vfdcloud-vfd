@@ -73,14 +73,6 @@ type (
 		RoutingKey  string
 		PrivateKey  *rsa.PrivateKey
 	}
-
-	ReceiptResponse struct {
-		ReceiptNumber string
-		Date          string
-		Time          string
-		AckCode       string
-		AckMessage    string
-	}
 )
 
 func (idType CUSTIDTYPE) String() string {
@@ -89,18 +81,18 @@ func (idType CUSTIDTYPE) String() string {
 
 var ErrReceiptUploadFailed = errors.New("receipt upload failed")
 
-func (c *httpx) UploadReceipt(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*ReceiptResponse, error) {
+func (c *httpx) UploadReceipt(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*Response, error) {
 	client := c.client
 
 	return receiptUpload(ctx, client, request, rct)
 }
 
-func ReceiptUpload(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*ReceiptResponse, error) {
+func ReceiptUpload(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*Response, error) {
 	client := http.DefaultClient
 	return receiptUpload(ctx, client, request, rct)
 }
 
-func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptRequest, rct *models.RCT) (*ReceiptResponse, error) {
+func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptRequest, rct *models.RCT) (*Response, error) {
 	var (
 		requestURL  = request.URL
 		privateKey  = request.PrivateKey
@@ -208,11 +200,11 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
 
-	return &ReceiptResponse{
-		ReceiptNumber: response.RCTACK.RCTNUM,
-		Date:          response.RCTACK.DATE,
-		Time:          response.RCTACK.TIME,
-		AckCode:       response.RCTACK.ACKCODE,
-		AckMessage:    response.RCTACK.ACKMSG,
+	return &Response{
+		Number:  response.RCTACK.RCTNUM,
+		Date:    response.RCTACK.DATE,
+		Time:    response.RCTACK.TIME,
+		Code:    response.RCTACK.ACKCODE,
+		Message: response.RCTACK.ACKMSG,
 	}, nil
 }

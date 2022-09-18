@@ -18,143 +18,54 @@ var ErrRegistrationFailed = errors.New("registration failed")
 
 type (
 	RegistrationRequest struct {
-		URL         string
 		ContentType string
 		CertSerial  string
 		Client      string
 		Tin         string
 		CertKey     string
-		PrivateKey  *rsa.PrivateKey
 	}
 
-	TaxCodes struct {
-		CodeA string
-		CodeB string
-		CodeC string
-		CodeD string
-	}
+	Registrar func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
+		request *RegistrationRequest) (*models.RegistrationResponse, error)
 
-	RegistrationResponse struct {
-		Code        string   `json:"Code,omitempty"`
-		Message     string   `json:"Message,omitempty"`
-		Id          string   `json:"Id,omitempty"`
-		Serial      string   `json:"Serial,omitempty"`
-		Uin         string   `json:"Uin,omitempty"`
-		Tin         string   `json:"Tin,omitempty"`
-		Vrn         string   `json:"Vrn,omitempty"`
-		Mobile      string   `json:"Mobile,omitempty"`
-		Address     string   `json:"Address,omitempty"`
-		Street      string   `json:"Street,omitempty"`
-		City        string   `json:"City,omitempty"`
-		Country     string   `json:"Country,omitempty"`
-		Name        string   `json:"Name,omitempty"`
-		ReceiptCode string   `json:"ReceiptCode,omitempty"`
-		Region      string   `json:"Region,omitempty"`
-		RoutingKey  string   `json:"RoutingKey,omitempty"`
-		GC          string   `json:"GC,omitempty"`
-		TaxOffice   string   `json:"TaxOffice,omitempty"`
-		Username    string   `json:"Username,omitempty"`
-		Password    string   `json:"Password,omitempty"`
-		TokenPath   string   `json:"TokenPath,omitempty"`
-		TaxCodes    TaxCodes `json:"TaxCodes"`
-	}
+	RegistrationMiddleware func(next Registrar) Registrar
 )
 
-func RegisterClient(ctx context.Context, url string, request *RegistrationRequest) (*models.RegistrationResponse, error) {
-	return register(ctx, httpClientInstance().client, url, request)
+func wrapRegistrationMiddleware(registrar Registrar, mw ...RegistrationMiddleware) Registrar {
+	// Loop backwards through the middleware invoking each one. Replace the
+	// registrar with the new wrapped registrar. Looping backwards ensures that the
+	// first middleware of the slice is the first to be executed by requests.
+	for i := len(mw) - 1; i >= 0; i-- {
+		u := mw[i]
+		if u != nil {
+			registrar = u(registrar)
+		}
+	}
+	return registrar
 }
 
-func (c *httpx) Register(ctx context.Context, request *RegistrationRequest) (*models.RegistrationResponse, error) {
-	//reg := models.RegistrationBody{
-	//	TIN:     request.Tin,
-	//	CERTKEY: request.CertKey,
-	//}
-	//
-	//out, err := xml.Marshal(&reg)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: failed to marshal registration body: %w", ErrRegistrationFailed, err)
-	//}
-	//
-	//signedPayload, err := c.SignPayload(ctx, request.PrivateKey, out)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//signedPayloadBase64 := base64.StdEncoding.EncodeToString(signedPayload)
-	//requestPayload := models.RegistrationRequest{
-	//	Reg:            reg,
-	//	EFDMSSIGNATURE: signedPayloadBase64,
-	//}
-	//
-	//out, err = xml.Marshal(&requestPayload)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//req, err := client.NewRequest(client.MethodPost, path, bytes.NewBuffer(out))
-	//if err != nil {
-	//	return nil, err
-	//}
-	//req.Header.Set("Content-Type", request.ContentType)
-	//req.Header.Set("Cert-Serial", request.CertSerial)
-	//req.Header.Set("httpx", request.httpx)
-	//
-	//resp, err := c.client.StandardClient().Do(req)
-	//if err != nil {
-	//	return nil, fmt.Errorf("client error: %v: %w", ErrRegistrationFailed, err)
-	//}
-	//
-	//defer func(Body io.ReadCloser) {
-	//	err := Body.Close()
-	//	if err != nil {
-	//		_, _ = fmt.Fprintf(os.Stderr, "registration: could not close response body %v", err)
-	//	}
-	//}(resp.Body)
-	//
-	//out, err = io.ReadAll(resp.Body)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %w", ErrRegistrationFailed, err)
-	//}
-	//
-	//if resp.StatusCode == 500 {
-	//	errBody := models.Error{}
-	//	err = xml.NewDecoder(bytes.NewBuffer(out)).Decode(&errBody)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("%v: %w", ErrRegistrationFailed, err)
-	//	}
-	//
-	//	return nil, fmt.Errorf("%w: %s", ErrRegistrationFailed, errBody.Message)
-	//}
-	//
-	//responseBody := models.RegistrationAck{}
-	//err = xml.NewDecoder(bytes.NewBuffer(out)).Decode(&responseBody)
-	//if err != nil {
-	//	return nil, fmt.Errorf("%v: %w", ErrRegistrationFailed, err)
-	//}
-	//
-	//response := &responseBody.EFDMSRESP
-	//
-	//// check if the response code is equal to zero if not
-	//// return an error with code and message
-	//if responseCode := response.ACKCODE; responseCode != "0" {
-	//	responseMessage := response.ACKMSG
-	//	return nil, fmt.Errorf("%v response code: %s, message: %s", ErrRegistrationFailed, responseCode, responseMessage)
-	//}
-	//
-	//return response, nil
+// Register send the registration for a Virtual Fiscal Device to the VFD server. The
+// registration request is signed with the private key of the certificate used to
+// authenticate the client.
+func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey,
+	request *RegistrationRequest, mw ...RegistrationMiddleware) (*models.RegistrationResponse, error) {
 
-	var (
-		client = c.client
-	)
+	registrar := func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
+		request *RegistrationRequest) (*models.RegistrationResponse, error) {
+		client := httpClientInstance().client
+		return register(ctx, client, url, privateKey, request)
+	}
 
-	return register(ctx, client, request.URL, request)
+	registrar = wrapRegistrationMiddleware(registrar, mw...)
+
+	return registrar(ctx, requestURL, privateKey, request)
 }
 
-func register(ctx context.Context, client *http.Client, requestURL string, request *RegistrationRequest) (*models.RegistrationResponse, error) {
+func register(ctx context.Context, client *http.Client, requestURL string, privateKey *rsa.PrivateKey,
+	request *RegistrationRequest) (*models.RegistrationResponse, error) {
 	var (
 		taxIdNumber = request.Tin
 		certKey     = request.CertKey
-		privateKey  = request.PrivateKey
 		apiClient   = request.Client
 		certSerial  = EncodeBase64String(request.CertSerial)
 		contentType = request.ContentType

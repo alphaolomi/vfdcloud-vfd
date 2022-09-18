@@ -3,53 +3,82 @@ package vfd
 import (
 	"context"
 	"crypto/rsa"
-	"crypto/x509"
 	"github.com/vfdcloud/vfd/models"
 )
 
-const (
-	VatrateStandard         = "A"
-	VatrateSpecial          = "B"
-	VatrateNonVatItems      = "C"
-	VatrateSpecialRelief    = "D"
-	VatrateExempt           = "E"
-	TaxCodeTaxableItem      = 1
-	TaxCodeTaxFreeItem      = 3
-	CustomerIDTaxIDNumber   = 1
-	CustomerIDDriverLicense = 2
-	CustomerIDVoterID       = 3
-	CustomerIDPassport      = 4
-	CustomerIDNationalID    = 5
-	CustomerIDNone          = 6
-	CustomerIDMeterNumber   = 7
-	PaymentTypeCash         = "CASH"    // Cash
-	PaymentTypeCheque       = "CHEQUE"  // Cheque
-	PaymentTypeCCard        = "CCARD"   // Credit Card
-	PaymentTypeEMoney       = "EMONEY"  // Electronic Money
-	PaymentTypeInvoice      = "INVOICE" // Invoice
-
-)
-
-const (
-	RequestTypeToken    = RequestType("TOKEN REQUEST")
-	RequestTypeRegister = RequestType("REGISTRATION")
-	RequestTypeReceipt  = RequestType("RECEIPT UPLOAD")
-	RequestTypeReport   = RequestType("REPORT UPLOAD")
-)
-
 type (
-
-	// API is an interface for the VFD API httpx. The interface should not hide some sort of state
-	// that the implementation may need to maintain. The Ideal implementation should be stateless.
-	// Hence, the interface should not hide details of the implementation.
-	API interface {
-		LoadCert(ctx context.Context, certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, error)
-		VerifySignature(ctx context.Context, privateKey *rsa.PublicKey, payload []byte, signature string) error
-		SignPayload(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte) ([]byte, error)
-		Register(ctx context.Context, request *RegistrationRequest) (*models.RegistrationResponse, error)
-		Token(ctx context.Context, request *TokenRequest) (*TokenResponse, error)
-		UploadReceipt(ctx context.Context, request *ReceiptRequest, receipt *models.RCT) (*ReceiptResponse, error)
+	// RequestHeaders represent collection of request headers during receipt or Z report
+	// sending via VFD Service
+	RequestHeaders struct {
+		ContentType string
+		CertSerial  string
+		BearerToken string
+		RoutingKey  string
 	}
 
-	RequestType string
+	// Response contains details returned when submitting a receipt to the VFD Service
+	// or a Z report.
+	// Number (int) is the receipt number in case of a receipt submission and the
+	// Z report number in case of a Z report submission.
+	// Date (string) is the date of the receipt or Z report submission. The format
+	// is YYYY-MM-DD.
+	// Time (string) is the time of the receipt or Z report submission. The format
+	// is HH24:MI:SS
+	// Code (int) is the response code. 0 means success.
+	// Message (string) is the response message.
+	Response struct {
+		Number  int64  `json:"number,omitempty"`
+		Date    string `json:"date,omitempty"`
+		Time    string `json:"time,omitempty"`
+		Code    int64  `json:"code,omitempty"`
+		Message string `json:"message,omitempty"`
+	}
+
+	// LoadCertFunc is a function that loads a certificate from a pfx file from the given path.
+	// returns the private key and the certificate.
+
+	Service interface {
+		// Register is used to register a virtual fiscal device (VFD) with the VFD Service.
+		// If successful, the VFD Service returns a registration response containing the
+		// VFD details and the credentials to use when submitting receipts and Z reports.
+		// Registering a VFD is a one-time operation. The subsequent calls to Register will
+		// yield the same response.VFD should store the registration response to
+		// avoid calling Register again.
+		Register(
+			ctx context.Context,
+			url string,
+			request *RegistrationRequest,
+		) (*models.RegistrationResponse, error)
+
+		// FetchToken is used to fetch a token from the VFD Service. The token is used
+		// to authenticate the VFD when submitting receipts and Z reports.
+		// credentials used here are the ones returned by the Register method.
+		FetchToken(
+			ctx context.Context,
+			url string,
+			request *TokenRequest,
+		) (*TokenResponse, error)
+
+		// SubmitReceipt is used to submit a receipt to the VFD Service. The receipt
+		// is signed using the private key. The private key is obtained from the certificate
+		// issued by the Revenue Authority during integration.
+		SubmitReceipt(
+			ctx context.Context,
+			url string,
+			headers *RequestHeaders,
+			privateKey *rsa.PrivateKey,
+			receipt *models.RCT,
+		) (*Response, error)
+
+		// SubmitReport is used to submit a Z report to the VFD Service. The Z report
+		// is signed using the private key. The private key is obtained from the certificate
+		// issued by the Revenue Authority during integration.
+		SubmitReport(
+			ctx context.Context,
+			url string,
+			headers *RequestHeaders,
+			privateKey *rsa.PrivateKey,
+			report *models.Report,
+		) (*Response, error)
+	}
 )

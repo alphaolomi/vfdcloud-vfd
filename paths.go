@@ -26,7 +26,7 @@ const (
 type (
 	Action string
 
-	RequestURL struct {
+	requestURL struct {
 		Registration  string
 		FetchToken    string
 		SubmitReceipt string
@@ -36,7 +36,7 @@ type (
 )
 
 var (
-	productionURLs = &RequestURL{
+	productionURLs = &requestURL{
 		Registration:  RegisterURLProd,
 		FetchToken:    TokenURLProd,
 		SubmitReceipt: ReceiptURLProd,
@@ -44,7 +44,7 @@ var (
 		VerifyReceipt: VerifyURLProd,
 	}
 
-	stagingURLs = &RequestURL{
+	stagingURLs = &requestURL{
 		Registration:  RegisterURLTest,
 		FetchToken:    TokenURLTest,
 		SubmitReceipt: ReceiptURLTest,
@@ -53,8 +53,8 @@ var (
 	}
 )
 
-func GetURL(e base.Env, action Action) string {
-	var u *RequestURL
+func RequestURL(e base.Env, action Action) string {
+	var u *requestURL
 	if e == base.ProdEnv {
 		u = productionURLs
 	} else {

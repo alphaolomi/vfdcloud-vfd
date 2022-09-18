@@ -51,7 +51,7 @@ func AppendEndpoint(url string, endpoints ...string) string {
 	return finalPath
 }
 
-// appendEndpoint appends a path to a RequestURL.
+// appendEndpoint appends a path to a requestURL.
 func appendEndpoint(url string, endpoint string) string {
 	var (
 		trimRight = strings.TrimRight

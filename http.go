@@ -26,7 +26,6 @@ var (
 )
 
 func httpClientInstance() *httpx {
-
 	once.Do(func() {
 		instance = defaultHTTPClient()
 	})
