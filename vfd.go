@@ -6,7 +6,35 @@ import (
 	"github.com/vfdcloud/vfd/models"
 )
 
+const (
+	CashPaymentType       PaymentType = "CASH"
+	CreditCardPaymentType PaymentType = "CCARD"
+	ChequePaymentType     PaymentType = "CHEQUE"
+	InvoicePaymentType    PaymentType = "INVOICE"
+	ElectronicPaymentType PaymentType = "EMONEY"
+
+	TinCustomerID         CustomerID = 1
+	LicenceCustomerID     CustomerID = 2
+	VoterIDCustomerID     CustomerID = 3
+	PassportCustomerID    CustomerID = 4
+	NidaCustomerID        CustomerID = 5
+	NonCustomerID         CustomerID = 6
+	MeterNumberCustomerID CustomerID = 7
+)
+
 type (
+	// PaymentType represent the type of payment that is recognized by the VFD server
+	// There are five types of payments: CASH, CHEQUE, CCARD, EMONEY and INVOICE
+	PaymentType string
+
+	// CustomerID is the type of ID the customer used during purchase
+	// The Type of ID is to be included in the receipt.
+	// Allowed values for CustomerID are 1 through 7. The number to type
+	// mapping are as follows:
+	// 1: Tax Identification Number (TIN), 2: Driving License, 3: Voters Number,
+	// 4: Travel Passport, 5: National ID, 6: NIL (No Identity Used), 7: Meter Number
+	CustomerID int
+
 	// RequestHeaders represent collection of request headers during receipt or Z report
 	// sending via VFD Service
 	RequestHeaders struct {

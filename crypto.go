@@ -11,16 +11,21 @@ import (
 )
 
 type (
-	LoadCertFunc func(
+	// CertLoader loads a certificate from a file and returns the private key and the certificate
+	CertLoader func(
 		ctx context.Context, certPath string, certPassword string) (
 		*rsa.PrivateKey, *x509.Certificate, error,
 	)
 
-	VerifySignatureFunc func(
+	// SignatureVerifier verifies the signature of a payload using the public key
+	// of the signing certificate
+	SignatureVerifier func(
 		ctx context.Context, publicKey *rsa.PublicKey,
 		payload []byte, signature string) error
 
-	SignPayloadFunc func(
+	// PayloadSigner signs a payload using the private key of the signing certificate
+	// all requests to the VFD API must be signed.
+	PayloadSigner func(
 		ctx context.Context, privateKey *rsa.PrivateKey,
 		payload []byte) ([]byte, error)
 )

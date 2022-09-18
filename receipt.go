@@ -4,112 +4,79 @@ import (
 	"bytes"
 	"context"
 	"crypto/rsa"
-	"encoding/base64"
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/vfdcloud/vfd/models"
 	"io"
 	"net/http"
 	"os"
-
-	"github.com/vfdcloud/vfd/models"
 )
-
-const (
-	CustomerIDTypeTIN CUSTIDTYPE = iota + 1
-	CustomerIDTypeDrivingLicense
-	CustomerIDTypeVoterID
-	CustomerIDTypePassport
-	CustomerIDTypeNIDA
-	CustomerIDTypeNIL
-	CustomerIDTypeMeterNumber
-)
-
-const ()
-
-const (
-	PMTTYPE_CHEQUE  = "CHEQUE"  // Cheque
-	PMTTYPE_CCARD   = "CCARD"   // Credit Card
-	PMTTYPE_EMONEY  = "EMONEY"  // Electronic Money
-	PMTTYPE_INVOICE = "INVOICE" // Invoice
-)
-
-type (
-
-	// CUSTIDTYPE is Buyer Used ID type.
-	// CustomerIDTypeTIN (1) - Tax Identification Number,
-	// CustomerIDTypeDrivingLicense (2) - Driving License,
-	// CustomerIDTypeVoterID (3) - Voters Number,
-	// CustomerIDTypePassport (4) - Travel Passport,
-	// CustomerIDTypeNIDA (5) - National ID,
-	// CustomerIDTypeNIL (6) - NIL (No Identity Used),
-	// CustomerIDTypeMeterNumber (7) - Meter Number
-	CUSTIDTYPE int
-
-	// PMTTYPE is the payment type used during the payment.
-	// 1. CASH 2. CHEQUE 3. CCARD 4. EMONEY and 5. INVOICE
-	PMTTYPE string
-
-	// VATRATE is the identifier of the VAT rate used during the payment.
-	// Identifier of the Tax rate
-	// A= 18 (Standard Rate for VAT items)
-	// B= 0 (Special Rate)
-	// C= 0 (Zero rated for Non-VAT items)
-	// D= 0 (Special Relief for relieved items)
-	// E= 0 (Exempt items)
-	VATRATE string
-
-	// ReceiptRequest is the request body for posting the receipt
-	// ContentType is always Application/xml
-	// RoutingKey vfdrct
-	// CertSerial is the serial of the Key certificate provided. Should be base64 encoded.
-	// BearerToken bearer <token_value>
-	// i.e. it should start with word bearer followed by space then followed by current token value
-	ReceiptRequest struct {
-		URL         string
-		ContentType string
-		CertSerial  string
-		BearerToken string
-		RoutingKey  string
-		PrivateKey  *rsa.PrivateKey
-	}
-)
-
-func (idType CUSTIDTYPE) String() string {
-	return [...]string{"1", "2", "3", "4", "5", "6", "7"}[idType-1]
-}
 
 var ErrReceiptUploadFailed = errors.New("receipt upload failed")
 
-func (c *httpx) UploadReceipt(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*Response, error) {
-	client := c.client
+type (
+	// ReceiptUploader uploads receipts to the VFD server
+	ReceiptUploader func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+		receipt *models.RCT) (*Response, error)
 
-	return receiptUpload(ctx, client, request, rct)
+	ReceiptUploadMiddleware func(next ReceiptUploader) ReceiptUploader
+)
+
+func VerifyUploadReceiptRequest() ReceiptUploadMiddleware {
+	m := func(next ReceiptUploader) ReceiptUploader {
+		u := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+			receipt *models.RCT) (*Response, error) {
+
+			// Steps:
+			// TODO 1. Verify the request headers
+			// TODO 2. verify request URL
+			// TODO 3. Verify the receipt
+			return next(ctx, url, headers, privateKey, receipt)
+		}
+		return u
+	}
+	return m
 }
 
-func ReceiptUpload(ctx context.Context, request *ReceiptRequest, rct *models.RCT) (*Response, error) {
-	client := http.DefaultClient
-	return receiptUpload(ctx, client, request, rct)
+// UploadReceipt uploads a receipt to the VFD server.
+func UploadReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+	rct *models.RCT, mw ...ReceiptUploadMiddleware) (*Response, error) {
+	client := httpClientInstance().client
+	uploader := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+		receipt *models.RCT) (*Response, error) {
+		return uploadReceipt(ctx, client, url, headers, privateKey, receipt)
+	}
+	uploader = wrapReceiptUploaderMiddleware(uploader, VerifyUploadReceiptRequest())
+	uploader = wrapReceiptUploaderMiddleware(uploader, mw...)
+	return uploader(ctx, requestURL, headers, privateKey, rct)
 }
 
-func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptRequest, rct *models.RCT) (*Response, error) {
+func wrapReceiptUploaderMiddleware(uploader ReceiptUploader, mw ...ReceiptUploadMiddleware,
+) ReceiptUploader {
+	// Loop backwards through the middleware invoking each one. Replace the
+	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
+	// first middleware of the slice is the first to be executed by requests.
+	for i := len(mw) - 1; i >= 0; i-- {
+		u := mw[i]
+		if u != nil {
+			uploader = u(uploader)
+		}
+	}
+
+	return uploader
+}
+
+func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+	rct *models.RCT) (*Response, error) {
 	var (
-		requestURL  = request.URL
-		privateKey  = request.PrivateKey
-		contentType = request.ContentType
-		routingKey  = request.RoutingKey
-		certSerial  = request.CertSerial
-		bearerToken = request.BearerToken
+		contentType = headers.ContentType
+		routingKey  = headers.RoutingKey
+		certSerial  = headers.CertSerial
+		bearerToken = headers.BearerToken
 	)
 
-	// print certSerial
-	// FIXME: remove this line
-	fmt.Sprintf("\n\n\ncertSerial(receipt upload): %s\n\n\n", certSerial)
-
-	//log.F(xio.Stdout, "VFD_GATEWAY",
-	//	"TRACE", log.LevelDebug, "UploadReceipt: ", fmt.Sprintf("%+v", request),
-	//)
-	pctx, cancel := context.WithCancel(ctx)
+	newContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	out, err := xml.Marshal(rct)
@@ -117,13 +84,11 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 		return nil, err
 	}
 
-	//log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("UploadReceipt: %s", string(out)))
-
 	signedPayload, err := Sign(ctx, privateKey, out)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
-	signedPayloadBase64 := base64.StdEncoding.EncodeToString(signedPayload)
+	signedPayloadBase64 := EncodeBase64Bytes(signedPayload)
 	requestPayload := models.RCTEFDMS{
 		RCT:            *rct,
 		EFDMSSIGNATURE: signedPayloadBase64,
@@ -133,37 +98,16 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 	if err != nil {
 		return nil, err
 	}
-	//outHeader := []byte(xml.Header + string(out))
 
-	//log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("UploadReceipt: %s", string(outHeader)))
-	req, err := http.NewRequestWithContext(pctx, http.MethodPost, requestURL, bytes.NewBuffer(out))
+	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL, bytes.NewBuffer(out))
 	if err != nil {
 		return nil, err
 	}
 
-	/// print out
-	// Filename should be {DATE}-{GC}-{DC}-receipt.xml
-	// They are stored under receipts folder in the home directory
-
-	// create receipt folder if not exists in the home directory
-	if _, err := os.Stat("./receipts"); os.IsNotExist(err) {
-		err = os.Mkdir("./receipts", 0755)
-		if err != nil {
-			return nil, err
-		}
-	}
-	fileName := fmt.Sprintf("%s-%s-%s-receipt.xml", rct.DATE, rct.GC, rct.DC)
-	filePath := fmt.Sprintf("./receipts/%s", fileName)
-	f, _ := os.Create(filePath)
-	_, _ = f.Write(out)
-
-	// Header setting
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Routing-Key", routingKey)
 	req.Header.Set("Cert-Serial", certSerial)
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
-
-	//	log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, fmt.Sprintf("\n\nHeaders: %+v\n\n", req.Header))
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -180,9 +124,6 @@ func receiptUpload(ctx context.Context, client *http.Client, request *ReceiptReq
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
-
-	// Log the response
-	//log.F(xio.Stdout, "VFD_GATEWAY", "TRACE", log.LevelDebug, "registration response, status: ", resp.Status, "headers", resp.Header, "body", string(out))
 
 	if resp.StatusCode == 500 {
 		errBody := models.Error{}
