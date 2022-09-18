@@ -3,10 +3,6 @@ package models
 import "encoding/xml"
 
 type (
-	Validator interface {
-		Validate() error
-	}
-
 	RegistrationAck struct {
 		XMLName        xml.Name             `xml:"EFDMS"`
 		Text           string               `xml:",chardata"`
