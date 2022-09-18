@@ -44,6 +44,17 @@ type (
 		RoutingKey  string
 	}
 
+	Payment struct {
+		Type   PaymentType
+		Amount float64
+	}
+
+	VatTotal struct {
+		Rate   float64
+		Amount float64
+		Tax    float64
+	}
+
 	// Response contains details returned when submitting a receipt to the VFD Service
 	// or a Z report.
 	// Number (int) is the receipt number in case of a receipt submission and the
