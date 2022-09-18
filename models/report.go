@@ -1,8 +1,17 @@
 package models
 
-import "fmt"
+import (
+	"encoding/xml"
+	"fmt"
+)
 
 type (
+	ReportEFDMS struct {
+		XMLName        xml.Name `xml:"EFDMS"`
+		Text           string   `xml:",chardata"`
+		ZREPORT        Report   `xml:"ZREPORT"`
+		EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
+	}
 	// Lines ...
 	Lines struct {
 		Name    string
