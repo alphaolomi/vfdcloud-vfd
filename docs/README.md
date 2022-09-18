@@ -1,3 +1,4 @@
+## INTEGRATION RULES
 1. Registration is a onetime request. In order to be able to access EFDMS taxpayer (seller)
    must send TIN number so TRA can register VFD for use
 2. Registration data must be saved to taxpayer system database for later use.
@@ -9,7 +10,7 @@
    will be used in this case. (TRA provides)
 6. GC, RCTNUM and Dc must be maintained by taxpayer's system
 7. GC must always be equal to RCNUM and starts from one (1) and always increment for
-      each invoice/receipt issued. Numbers should follow sequence without skipping
+   each invoice/receipt issued. Numbers should follow sequence without skipping
 8. DC starts with 1 and increment until 23:59:59 (midnight) and after midnight DC resets
    (starts with 1 again when first invoice/receipt for a new day is issued)
 9. Different receipts/invoices can never have same GC they must always be unique
@@ -40,7 +41,7 @@
     (ACKCODE which is not 0) for specific invoice/receipt then when resubmitting the same
     invoice/receipt to TRA the VFD should submit the original xml content and not the modified
     the content this include also ZNUM and RCT_DATE, RCT_TIME must always be date of
-    the first attempt and not the current date/time. This is to say monitor status of each receipt 
+    the first attempt and not the current date/time. This is to say monitor status of each receipt
     and only when response with ACKCODE 0 returned consider receipt successful delivered
     to TRA
 24. Print/send receipt/invoice to customer (do not wait for TRA response) and immediately
@@ -60,3 +61,15 @@
 30. Token will be requested only after expiry of current one, so before posting to TRA check
     if current token is valid and only post if is valid otherwise request new one
 31. Token value must be saved to taxpayer billing system
+
+
+## TEST CASES SCENARIOS
+It is suggested that these are done during testing the VFD integration to determine if the implementation works as expected
+
+1. Post receipts/invoices with different CUSTIDTYPES as indicated in the API
+2. Post receipts/invoices with discounts if any
+3. Post receipts/invoices with multiple items having different tax codes if any as per API
+4. For receipt post transactions with different payment types as indicated in the API
+5. We recommend posting transactions in daily basis (this helps us checking sequence of
+   DC, GC, ZNUM).
+6. Post as many transactions as possible preferably from 100 and above.
