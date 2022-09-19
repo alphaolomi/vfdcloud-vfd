@@ -7,23 +7,49 @@ import (
 )
 
 const (
-	StandardVatrateId                 = "A"
-	StandardVatrate                   = 18
-	CashPaymentType       PaymentType = "CASH"
-	CreditCardPaymentType PaymentType = "CCARD"
-	ChequePaymentType     PaymentType = "CHEQUE"
-	InvoicePaymentType    PaymentType = "INVOICE"
-	ElectronicPaymentType PaymentType = "EMONEY"
-	TinCustomerID         CustomerID  = 1
-	LicenceCustomerID     CustomerID  = 2
-	VoterIDCustomerID     CustomerID  = 3
-	PassportCustomerID    CustomerID  = 4
-	NidaCustomerID        CustomerID  = 5
-	NonCustomerID         CustomerID  = 6
-	MeterNumberCustomerID CustomerID  = 7
+	RegisterProductionURL                  = "https://vfd.tra.go.tz/api/vfdRegReq"
+	FetchTokenProductionURL                = "https://vfd.tra.go.tz/vfdtoken"
+	SubmitReceiptProductionURL             = "https://vfd.tra.go.tz/api/efdmsRctInfo"
+	SubmitReportProductionURL              = "https://vfd.tra.go.tz/api/efdmszreport"
+	VerifyReceiptProductionURL             = "https://verify.tra.go.tz/"
+	RegisterTestingURL                     = "https://virtual.tra.go.tz/efdmsRctApi/api/vfdRegReq"
+	FetchTokenTestingURL                   = "https://virtual.tra.go.tz/efdmsRctApi/vfdtoken"
+	SubmitReceiptTestingURL                = "https://virtual.tra.go.tz/efdmsRctApi/api/efdmsRctInfo"
+	SubmitReportTestingURL                 = "https://virtual.tra.go.tz/efdmsRctApi/api/efdmszreport"
+	VerifyReceiptTestingURL                = "https://virtual.tra.go.tz/efdmsRctVerify/"
+	RegisterClientAction       Action      = "register"
+	FetchTokenAction           Action      = "token"
+	SubmitReceiptAction        Action      = "receipt"
+	SubmitReportAction         Action      = "report"
+	ReceiptVerificationAction  Action      = "verification"
+	StandardVatrateId                      = "A"
+	StandardVatrate                        = 18
+	CashPaymentType            PaymentType = "CASH"
+	CreditCardPaymentType      PaymentType = "CCARD"
+	ChequePaymentType          PaymentType = "CHEQUE"
+	InvoicePaymentType         PaymentType = "INVOICE"
+	ElectronicPaymentType      PaymentType = "EMONEY"
+	TinCustomerID              CustomerID  = 1
+	LicenceCustomerID          CustomerID  = 2
+	VoterIDCustomerID          CustomerID  = 3
+	PassportCustomerID         CustomerID  = 4
+	NidaCustomerID             CustomerID  = 5
+	NonCustomerID              CustomerID  = 6
+	MeterNumberCustomerID      CustomerID  = 7
 )
 
 type (
+	// Action signifies the action to be performed among the four defined actions
+	// which are client registration, token fetching, submission of receipt and
+	// submission of report
+	Action     string
+	requestURL struct {
+		Registration  string
+		FetchToken    string
+		SubmitReceipt string
+		SubmitReport  string
+		VerifyReceipt string
+	}
 	// PaymentType represent the type of payment that is recognized by the VFD server
 	// There are five types of payments: CASH, CHEQUE, CCARD, EMONEY and INVOICE
 	PaymentType string

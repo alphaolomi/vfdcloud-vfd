@@ -304,9 +304,9 @@ func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime 
 	var baseURL string
 
 	if e == base.ProdEnv {
-		baseURL = VerifyURLProd
+		baseURL = VerifyReceiptProductionURL
 	} else {
-		baseURL = VerifyURLTest
+		baseURL = VerifyReceiptTestingURL
 	}
 	return receiptLink(baseURL, receiptVerificationNumber, receiptVerificationTime)
 }
