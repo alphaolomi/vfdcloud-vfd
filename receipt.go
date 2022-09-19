@@ -8,6 +8,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/vfdcloud/base"
 	"github.com/vfdcloud/vfd/models"
 	"io"
 	"net/http"
@@ -296,4 +297,24 @@ func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, custo
 	report = fmt.Sprintf("%s%s", xml.Header, report)
 
 	return []byte(report), nil
+}
+
+// ReceiptLink creates a link to the receipt
+func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime string) string {
+	var baseURL string
+
+	if e == base.ProdEnv {
+		baseURL = VerifyURLProd
+	} else {
+		baseURL = VerifyURLTest
+	}
+	return receiptLink(baseURL, receiptVerificationNumber, receiptVerificationTime)
+}
+
+func receiptLink(baseURL string, receiptVerificationNumber, receiptVerificationTime string) string {
+	return fmt.Sprintf(
+		"%s%s_%s",
+		baseURL,
+		receiptVerificationNumber,
+		strings.ReplaceAll(receiptVerificationTime, ":", ""))
 }
