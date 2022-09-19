@@ -100,8 +100,7 @@ func UploadReceipt(ctx context.Context, requestURL string, headers *RequestHeade
 	return uploader(ctx, requestURL, headers, privateKey, rct)
 }
 
-func wrapReceiptUploaderMiddleware(uploader ReceiptUploader, mw ...ReceiptUploadMiddleware,
-) ReceiptUploader {
+func wrapReceiptUploaderMiddleware(uploader ReceiptUploader, mw ...ReceiptUploadMiddleware) ReceiptUploader {
 	// Loop backwards through the middleware invoking each one. Replace the
 	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
 	// first middleware of the slice is the first to be executed by requests.
