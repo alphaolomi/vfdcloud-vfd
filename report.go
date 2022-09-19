@@ -15,6 +15,19 @@ import (
 var ErrReportSubmitFailed = fmt.Errorf("report submit failed")
 
 type (
+	// ReportTotals contains different number of totals
+	ReportTotals struct {
+		DailyTotalAmount float64
+		Gross            float64
+		Corrections      float64
+		Discounts        float64
+		Surcharges       float64
+		TicketsVoid      float64
+		TicketsVoidTotal int64
+		TicketsFiscal    int64
+		TicketsNonFiscal int64
+	}
+
 	ReportSubmitter func(ctx context.Context, url string, headers *RequestHeaders,
 		privateKey *rsa.PrivateKey,
 		report *models.Report) (*Response, error)

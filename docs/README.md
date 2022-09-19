@@ -73,3 +73,107 @@ It is suggested that these are done during testing the VFD integration to determ
 5. We recommend posting transactions in daily basis (this helps us checking sequence of
    DC, GC, ZNUM).
 6. Post as many transactions as possible preferably from 100 and above.
+
+
+
+## REPORT XML EXAMPLE
+```xml
+<?xml version="1.0"?>
+		<EFDMS>
+			<ZREPORT>
+				<DATE>2020-06-03</DATE>
+				<TIME>05:53:04</TIME>
+				<HEADER>
+					<LINE>TEST TAXPAYER</LINE>
+					<LINE>PLOT:125/126/127,MAGOMENI STREET</LINE>
+					<LINE>TEL NO:+255 999999</LINE>
+					<LINE>DAR ES SALAAM,TANZANIA</LINE>
+					<!--HEADER DETAILS FOR TAXPAYER AS PER REGISTRATION ACKNOWLEDGEMNT-->
+				</HEADER>
+				<VRN>12345678A</VRN>
+				<TIN>222222222</TIN>
+				<TAXOFFICE>TEST REGION</TAXOFFICE>
+				<REGID>TZ0100082639</REGID>
+				<ZNUMBER>20201005</ZNUMBER>
+				<EFDSERIAL>10TZ107372</EFDSERIAL>
+				<REGISTRATIONDATE>2019-08-15</REGISTRATIONDATE>
+				<USER>09VFDWEBAPI-11111111122222222210TZ107372</USER>
+				<SIMIMSI>WEBAPI</SIMIMSI>
+				<!--FIX SIMIMSI TO WEBAPI-->
+				<TOTALS>
+                    <DAILYTOTALAMOUNT>2143250.00</DAILYTOTALAMOUNT>
+                    <!--SUM OF ALL SALES FOR THE DAY-->
+                    <GROSS>513880841.00</GROSS>
+                    <!--CUMMULATIVE SALES FROM DAY ONE TO PRESENT-->
+                    <CORRECTIONS>0.00</CORRECTIONS>
+                    <!--FIX CORRECTIONS TO ZERO-->
+                    <DISCOUNTS>0.00</DISCOUNTS>
+                    <!--TOTAL DISCOUNTS ISSUED -->
+                    <SURCHARGES>0.00</SURCHARGES>
+                    <!--FiX VALUE FOR SURCHARGE TO ZERO-->
+                    <TICKETSVOID>0</TICKETSVOID>
+                    <!--TOTAL NUMBER OF TICKETS VOIDED/CANCELLED IN THE SYSTEM AND THEREFORE NOT SENT TO TRA. -->
+                    <TICKETSVOIDTOTAL>0.00</TICKETSVOIDTOTAL>
+                    <!--TOTAL AMOUNT OF TICKETS VOIDED/CANCELLED IN THE SYSTEM AND THEREFORE NOT SENT TO TRA. -->
+                    <TICKETSFISCAL>36</TICKETSFISCAL>
+                    <!--TOTAL FISCAL RECEIPTS ISSUED-->
+                    <TICKETSNONFISCAL>6</TICKETSNONFISCAL>
+                    <!--TOTAL NUMBER OF RECEIPTS NOT SENT TO TRA AS A RESULT OF VOID/CANCEL -->
+				</TOTALS>
+				<VATTOTALS>
+                    <VATRATE>A-18.00</VATRATE>
+                    <NETTAMOUNT>1816313.55</NETTAMOUNT>
+                    <!--TOTAL ECXLUSIVE OF TAX FOR VAT ITEMS-->
+                    <TAXAMOUNT>326936.45</TAXAMOUNT>
+                    <!--TOTAL VAT FOR THE DAY-->
+                    <VATRATE>B-0.00</VATRATE>
+                    <NETTAMOUNT>0.00</NETTAMOUNT>
+                    <TAXAMOUNT>0.00</TAXAMOUNT>
+                    <VATRATE>C-0.00</VATRATE>
+                    <NETTAMOUNT>0.00</NETTAMOUNT>
+                    <!--TOTAL SALES FOR ZERO RATED ITEMS FOR FOR THE DAY-->
+                    <TAXAMOUNT>0.00</TAXAMOUNT>
+                    <!--TAX WILL ALWYAS BE ZERO-->
+                    <VATRATE>D-0.00</VATRATE>
+                    <NETTAMOUNT>0.00</NETTAMOUNT>
+                    <!--TAX WILL ALWYAS BE ZERO-->
+                    <TAXAMOUNT>0.00</TAXAMOUNT>
+                    <VATRATE>E-0.00</VATRATE>
+                    <!--TOTAL SALES FOR ZERO RATED ITEMS FOR FOR THE DAY-->
+                    <NETTAMOUNT>0.00</NETTAMOUNT>
+                    <!--TAX WILL ALWYAS BE ZERO-->
+                    <TAXAMOUNT>0.00</TAXAMOUNT>
+				</VATTOTALS>
+				<PAYMENTS>
+                    <PMTTYPE>CASH</PMTTYPE>
+                    <PMTAMOUNT>2143250.00</PMTAMOUNT>
+                    <!--TOTAL sales of all receipts paid by CASH-->
+                    <PMTTYPE>CHEQUE</PMTTYPE>
+                    <PMTAMOUNT>0.00</PMTAMOUNT>
+                    <!--TOTAL sales of all receipts paid by CHEQUE-->
+                    <PMTTYPE>CCARD</PMTTYPE>
+                    <PMTAMOUNT>0.00</PMTAMOUNT>
+                    <!--TOTAL sales of all receipts paid by CREDIT CARD-->
+                    <PMTTYPE>EMONEY</PMTTYPE>
+                    <PMTAMOUNT>0.00</PMTAMOUNT>
+                    <!--TOTAL sales of all receipts paid by EMONEY-->
+                    <PMTTYPE>INVOICE</PMTTYPE>
+                    <PMTAMOUNT>0.00</PMTAMOUNT>
+                    <!--TOTAL sales of all invoices. This is only applicable to INVOICES-->
+				</PAYMENTS>
+                <CHANGES>
+                    <VATCHANGENUM>0</VATCHANGENUM>
+                    <!--Fix VATCHANGENUM to 0-->
+                    <HEADCHANGENUM>0</HEADCHANGENUM>
+                    <!--Fix HEADCHANGENUM to 0-->
+				</CHANGES>
+				<ERRORS></ERRORS>
+				<!--For VFD leave ERROR node empty like shown-->
+				<FWVERSION>3.0</FWVERSION>
+				<!--Fix firmware version to 3.0-->
+				<FWCHECKSUM>WEBAPI</FWCHECKSUM>
+				<!--Fix checksum to WEBAPI-->
+			</ZREPORT>
+			<EFDMSSIGNATURE>hsjahkskskkaksasd+cVF1kZ/uuyuasdausyduyaus//+uS6GVIA9+obJUdb/sjkadkskaskjakdjkjahkhksd87w7qjlasdas9+skajsakjskajs//iKG+5UOR+86VgKNdVcjWuPzOhAO6b/+uywuygdhsyaydshahsgkjdfal+/5s84kz5EUJocHzLMrI0dbALUP8AgC97ZTUIFrM/jZUSd624MD26BHrjy5KTurhpS+HJlsotIZqxyPbaw==</EFDMSSIGNATURE>
+</EFDMS>
+```

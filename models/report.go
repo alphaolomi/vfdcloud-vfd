@@ -91,19 +91,6 @@ type (
 		FWVERSION  string `xml:"FWVERSION"`
 		FWCHECKSUM string `xml:"FWCHECKSUM"`
 	}
-
-	// ReportTotals contains different number of totals
-	ReportTotals struct {
-		DailyTotalAmount float64
-		Gross            float64
-		Corrections      float64
-		Discounts        float64
-		Surcharges       float64
-		TicketsVoid      float64
-		TicketsVoidTotal int64
-		TicketsFiscal    int64
-		TicketsNonFiscal int64
-	}
 )
 
 func (lines *Lines) List() []string {
