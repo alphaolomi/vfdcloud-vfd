@@ -2,8 +2,6 @@ package models
 
 import (
 	"encoding/xml"
-	"fmt"
-	"strings"
 )
 
 type (
@@ -31,14 +29,8 @@ type (
 		ZREPORT        Report   `xml:"ZREPORT"`
 		EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
 	}
-	// Lines ...
-	Lines struct {
-		Name    string
-		Street  string
-		Mobile  string
-		City    string
-		Country string
-	}
+	// Address ...
+
 	Report struct{}
 
 	ZREPORT struct {
@@ -50,39 +42,19 @@ type (
 			Text string   `xml:",chardata"`
 			LINE []string `xml:"LINE"`
 		} `xml:"HEADER"`
-		VRN              string `xml:"VRN"`
-		TIN              string `xml:"TIN"`
-		TAXOFFICE        string `xml:"TAXOFFICE"`
-		REGID            string `xml:"REGID"`
-		ZNUMBER          string `xml:"ZNUMBER"`
-		EFDSERIAL        string `xml:"EFDSERIAL"`
-		REGISTRATIONDATE string `xml:"REGISTRATIONDATE"`
-		USER             string `xml:"USER"`
-		SIMIMSI          string `xml:"SIMIMSI"`
-		TOTALS           struct {
-			Text             string `xml:",chardata"`
-			DAILYTOTALAMOUNT string `xml:"DAILYTOTALAMOUNT"`
-			GROSS            string `xml:"GROSS"`
-			CORRECTIONS      string `xml:"CORRECTIONS"`
-			DISCOUNTS        string `xml:"DISCOUNTS"`
-			SURCHARGES       string `xml:"SURCHARGES"`
-			TICKETSVOID      string `xml:"TICKETSVOID"`
-			TICKETSVOIDTOTAL string `xml:"TICKETSVOIDTOTAL"`
-			TICKETSFISCAL    string `xml:"TICKETSFISCAL"`
-			TICKETSNONFISCAL string `xml:"TICKETSNONFISCAL"`
-		} `xml:"TOTALS"`
-		VATTOTALS struct {
-			Text       string   `xml:",chardata"`
-			VATRATE    []string `xml:"VATRATE"`
-			NETTAMOUNT []string `xml:"NETTAMOUNT"`
-			TAXAMOUNT  []string `xml:"TAXAMOUNT"`
-		} `xml:"VATTOTALS"`
-		PAYMENTS struct {
-			Text      string   `xml:",chardata"`
-			PMTTYPE   []string `xml:"PMTTYPE"`
-			PMTAMOUNT []string `xml:"PMTAMOUNT"`
-		} `xml:"PAYMENTS"`
-		CHANGES struct {
+		VRN              string       `xml:"VRN"`
+		TIN              string       `xml:"TIN"`
+		TAXOFFICE        string       `xml:"TAXOFFICE"`
+		REGID            string       `xml:"REGID"`
+		ZNUMBER          string       `xml:"ZNUMBER"`
+		EFDSERIAL        string       `xml:"EFDSERIAL"`
+		REGISTRATIONDATE string       `xml:"REGISTRATIONDATE"`
+		USER             string       `xml:"USER"`
+		SIMIMSI          string       `xml:"SIMIMSI"`
+		TOTALS           REPORTTOTALS `xml:"TOTALS"`
+		VATTOTALS        VATTOTALS    `xml:"VATTOTALS"`
+		PAYMENTS         PAYMENTS     `xml:"PAYMENTS"`
+		CHANGES          struct {
 			Text          string `xml:",chardata"`
 			VATCHANGENUM  string `xml:"VATCHANGENUM"`
 			HEADCHANGENUM string `xml:"HEADCHANGENUM"`
@@ -91,12 +63,18 @@ type (
 		FWVERSION  string `xml:"FWVERSION"`
 		FWCHECKSUM string `xml:"FWCHECKSUM"`
 	}
-)
 
-func (lines *Lines) List() []string {
-	return []string{
-		strings.ToUpper(lines.Name),
-		strings.ToUpper(lines.Street),
-		fmt.Sprintf("MOBILE: %s", lines.Mobile),
-		strings.ToUpper(fmt.Sprintf("%s,%s", lines.City, lines.Country))}
-}
+	REPORTTOTALS struct {
+		XMLName          xml.Name `xml:"TOTALS"`
+		Text             string   `xml:",chardata"`
+		DAILYTOTALAMOUNT float64  `xml:"DAILYTOTALAMOUNT"`
+		GROSS            float64  `xml:"GROSS"`
+		CORRECTIONS      float64  `xml:"CORRECTIONS"`
+		DISCOUNTS        float64  `xml:"DISCOUNTS"`
+		SURCHARGES       float64  `xml:"SURCHARGES"`
+		TICKETSVOID      int64    `xml:"TICKETSVOID"`
+		TICKETSVOIDTOTAL float64  `xml:"TICKETSVOIDTOTAL"`
+		TICKETSFISCAL    int64    `xml:"TICKETSFISCAL"`
+		TICKETSNONFISCAL int64    `xml:"TICKETSNONFISCAL"`
+	}
+)

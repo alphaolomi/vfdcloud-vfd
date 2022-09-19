@@ -88,10 +88,10 @@ type (
 	}
 
 	PAYMENT struct {
-		XMLName   xml.Name `xml:"PAYMENTS"`
+		XMLName   xml.Name `xml:"PAYMENT"`
 		Text      string   `xml:",chardata"`
 		PMTTYPE   string   `xml:"PMTTYPE"`
-		PMTAMOUNT string   `xml:"PMTAMOUNT"`
+		PMTAMOUNT float64  `xml:"PMTAMOUNT"`
 	}
 
 	ITEMS struct {
@@ -105,25 +105,25 @@ type (
 		Text    string   `xml:",chardata"`
 		ID      string   `xml:"ID"`
 		DESC    string   `xml:"DESC"`
-		QTY     string   `xml:"QTY"`
-		TAXCODE int      `xml:"TAXCODE"`
-		AMT     string   `xml:"AMT"`
+		QTY     int64    `xml:"QTY"`
+		TAXCODE int64    `xml:"TAXCODE"`
+		AMT     float64  `xml:"AMT"`
 	}
 
 	TOTALS struct {
 		XMLName      xml.Name `xml:"TOTALS"`
 		Text         string   `xml:",chardata"`
-		TOTALTAXEXCL string   `xml:"TOTALTAXEXCL"`
-		TOTALTAXINCL string   `xml:"TOTALTAXINCL"`
-		DISCOUNT     string   `xml:"DISCOUNT"`
+		TOTALTAXEXCL float64  `xml:"TOTALTAXEXCL"`
+		TOTALTAXINCL float64  `xml:"TOTALTAXINCL"`
+		DISCOUNT     float64  `xml:"DISCOUNT"`
 	}
 
-	VATTOTALS struct {
-		XMLName    xml.Name `xml:"VATTOTALS"`
+	VATTOTAL struct {
+		XMLName    xml.Name `xml:"VATTOTAL"`
 		Text       string   `xml:",chardata"`
 		VATRATE    string   `xml:"VATRATE"`
-		NETTAMOUNT string   `xml:"NETTAMOUNT"`
-		TAXAMOUNT  string   `xml:"TAXAMOUNT"`
+		NETTAMOUNT float64  `xml:"NETTAMOUNT"`
+		TAXAMOUNT  float64  `xml:"TAXAMOUNT"`
 	}
 
 	RCTEFDMS struct {
@@ -131,5 +131,17 @@ type (
 		Text           string   `xml:",chardata"`
 		RCT            RCT      `xml:"RCT"`
 		EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
+	}
+
+	VATTOTALS struct {
+		XMLName  xml.Name    `xml:"VATTOTALS"`
+		Text     string      `xml:",chardata"`
+		VATTOTAL []*VATTOTAL `xml:"VATTOTAL"`
+	}
+
+	PAYMENTS struct {
+		XMLName xml.Name   `xml:"PAYMENTS"`
+		Text    string     `xml:",chardata"`
+		PAYMENT []*PAYMENT `xml:"PAYMENT"`
 	}
 )

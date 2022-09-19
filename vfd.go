@@ -7,19 +7,20 @@ import (
 )
 
 const (
+	StandardVatrateId                 = "A"
+	StandardVatrate                   = 18
 	CashPaymentType       PaymentType = "CASH"
 	CreditCardPaymentType PaymentType = "CCARD"
 	ChequePaymentType     PaymentType = "CHEQUE"
 	InvoicePaymentType    PaymentType = "INVOICE"
 	ElectronicPaymentType PaymentType = "EMONEY"
-
-	TinCustomerID         CustomerID = 1
-	LicenceCustomerID     CustomerID = 2
-	VoterIDCustomerID     CustomerID = 3
-	PassportCustomerID    CustomerID = 4
-	NidaCustomerID        CustomerID = 5
-	NonCustomerID         CustomerID = 6
-	MeterNumberCustomerID CustomerID = 7
+	TinCustomerID         CustomerID  = 1
+	LicenceCustomerID     CustomerID  = 2
+	VoterIDCustomerID     CustomerID  = 3
+	PassportCustomerID    CustomerID  = 4
+	NidaCustomerID        CustomerID  = 5
+	NonCustomerID         CustomerID  = 6
+	MeterNumberCustomerID CustomerID  = 7
 )
 
 type (
@@ -50,9 +51,9 @@ type (
 	}
 
 	VatTotal struct {
+		ID     string
 		Rate   float64
 		Amount float64
-		Tax    float64
 	}
 
 	// Response contains details returned when submitting a receipt to the VFD Service

@@ -145,26 +145,3 @@ func (tr *TokenResponse) String() string {
 	return fmt.Sprintf("FetchToken Response: [Code=%s,Message=%s,AccessToken=%s,TokenType=%s,ExpiresIn=%d seconds,Error=%s]",
 		tr.Code, tr.Message, tr.AccessToken, tr.TokenType, tr.ExpiresIn, tr.Error)
 }
-
-//func TokenSaverMiddleware() TokenFetcherMiddleware {
-//	// This is the actual middleware function to be executed.
-//	m := func(handler TokenFetcher) TokenFetcher{
-//		f := func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
-//			response, err := handler(ctx, url, request)
-//			if err != nil {
-//				return nil, err
-//			}
-//
-//			if response.AccessToken != "" {
-//				// save the token
-//				_ = SaveToken(response.AccessToken)
-//			}
-//
-//			return response, nil
-//		}
-//
-//		return f
-//	}
-//
-//	return m
-//}
