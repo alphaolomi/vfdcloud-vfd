@@ -12,7 +12,7 @@ type mock struct{}
 
 func (m *mock) Register(ctx context.Context, url string, key *rsa.PrivateKey, request *RegistrationRequest) (
 	*models.RegistrationResponse, error) {
-	return Register(ctx, url, key, request)
+	return Register(ctx, url, key, request, nil)
 }
 
 func (m *mock) FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
@@ -21,7 +21,7 @@ func (m *mock) FetchToken(ctx context.Context, url string, request *TokenRequest
 
 func (m *mock) SubmitReceipt(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	receipt *ReceiptRequest) (*Response, error) {
-	return UploadReceipt(ctx, url, headers, privateKey, receipt, nil)
+	return SubmitReceipt(ctx, url, headers, privateKey, receipt, nil)
 }
 
 func (m *mock) SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,

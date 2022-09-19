@@ -64,15 +64,15 @@ type (
 		Items    []Item
 		Payments []Payment
 	}
-	// ReceiptUploader uploads receipts to the VFD server
-	ReceiptUploader func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+	// ReceiptSubmitter uploads receipts to the VFD server
+	ReceiptSubmitter func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 		receipt *ReceiptRequest) (*Response, error)
 
-	ReceiptUploadMiddleware func(next ReceiptUploader) ReceiptUploader
+	ReceiptSubmitMiddleware func(next ReceiptSubmitter) ReceiptSubmitter
 )
 
-func VerifyUploadReceiptRequest() ReceiptUploadMiddleware {
-	m := func(next ReceiptUploader) ReceiptUploader {
+func VerifyUploadReceiptRequest() ReceiptSubmitMiddleware {
+	m := func(next ReceiptSubmitter) ReceiptSubmitter {
 		u := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 			receipt *ReceiptRequest) (*Response, error) {
 
@@ -87,20 +87,20 @@ func VerifyUploadReceiptRequest() ReceiptUploadMiddleware {
 	return m
 }
 
-// UploadReceipt uploads a receipt to the VFD server.
-func UploadReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *ReceiptRequest, mw ...ReceiptUploadMiddleware) (*Response, error) {
+// SubmitReceipt uploads a receipt to the VFD server.
+func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+	rct *ReceiptRequest, mw ...ReceiptSubmitMiddleware) (*Response, error) {
 	client := getHttpClientInstance().client
 	uploader := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 		receipt *ReceiptRequest) (*Response, error) {
-		return uploadReceipt(ctx, client, url, headers, privateKey, receipt)
+		return submitReceipt(ctx, client, url, headers, privateKey, receipt)
 	}
-	uploader = wrapReceiptUploaderMiddleware(uploader, VerifyUploadReceiptRequest())
-	uploader = wrapReceiptUploaderMiddleware(uploader, mw...)
+	uploader = wrapReceiptSubmitMiddlewares(uploader, VerifyUploadReceiptRequest())
+	uploader = wrapReceiptSubmitMiddlewares(uploader, mw...)
 	return uploader(ctx, requestURL, headers, privateKey, rct)
 }
 
-func wrapReceiptUploaderMiddleware(uploader ReceiptUploader, mw ...ReceiptUploadMiddleware) ReceiptUploader {
+func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmitMiddleware) ReceiptSubmitter {
 	// Loop backwards through the middleware invoking each one. Replace the
 	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
 	// first middleware of the slice is the first to be executed by requests.
@@ -114,7 +114,7 @@ func wrapReceiptUploaderMiddleware(uploader ReceiptUploader, mw ...ReceiptUpload
 	return uploader
 }
 
-func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	rct *ReceiptRequest) (*Response, error) {
 	var (
 		contentType = headers.ContentType
