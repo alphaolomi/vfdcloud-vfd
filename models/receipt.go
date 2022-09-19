@@ -49,42 +49,19 @@ type (
 		TIN        string    `xml:"TIN"`
 		REGID      string    `xml:"REGID"`
 		EFDSERIAL  string    `xml:"EFDSERIAL"`
-		CUSTIDTYPE string    `xml:"CUSTIDTYPE"`
+		CUSTIDTYPE int64     `xml:"CUSTIDTYPE"`
 		CUSTID     string    `xml:"CUSTID"`
 		CUSTNAME   string    `xml:"CUSTNAME"`
 		MOBILENUM  string    `xml:"MOBILENUM"`
 		RCTNUM     string    `xml:"RCTNUM"`
-		DC         string    `xml:"DC"`
-		GC         string    `xml:"GC"`
+		DC         int64     `xml:"DC"`
+		GC         int64     `xml:"GC"`
 		ZNUM       string    `xml:"ZNUM"`
 		RCTVNUM    string    `xml:"RCTVNUM"`
 		ITEMS      ITEMS     `xml:"ITEMS"`
 		TOTALS     TOTALS    `xml:"TOTALS"`
-		PAYMENTS   PAYMENT   `xml:"PAYMENTS"`
+		PAYMENTS   PAYMENTS  `xml:"PAYMENTS"`
 		VATTOTALS  VATTOTALS `xml:"VATTOTALS"`
-	}
-
-	Receipt struct {
-		XMLName         xml.Name  `xml:"RCT"`
-		Text            string    `xml:",chardata"`
-		DATE            string    `xml:"DATE"`
-		TIME            string    `xml:"TIME"`
-		TIN             string    `xml:"TIN"`
-		REGID           string    `xml:"REGID"`
-		EFDSerial       string    `xml:"EFDSERIAL"`
-		CustomerIdType  string    `xml:"CUSTIDTYPE"`
-		CustomerID      string    `xml:"CUSTID"`
-		CustomerName    string    `xml:"CUSTNAME"`
-		MobileNum       string    `xml:"MOBILENUM"`
-		Number          string    `xml:"RCTNUM"`
-		DC              string    `xml:"DC"`
-		GC              string    `xml:"GC"`
-		ZNum            string    `xml:"ZNUM"`
-		VerificationNum string    `xml:"RCTVNUM"`
-		ITEMS           ITEMS     `xml:"ITEMS"`
-		TOTALS          TOTALS    `xml:"TOTALS"`
-		PAYMENTS        PAYMENT   `xml:"PAYMENTS"`
-		VATTOTALS       VATTOTALS `xml:"VATTOTALS"`
 	}
 
 	PAYMENT struct {
@@ -97,7 +74,7 @@ type (
 	ITEMS struct {
 		XMLName xml.Name `xml:"ITEMS"`
 		Text    string   `xml:",chardata"`
-		ITEM    []ITEM   `xml:"ITEM"`
+		ITEM    []*ITEM  `xml:"ITEM"`
 	}
 
 	ITEM struct {
@@ -105,7 +82,7 @@ type (
 		Text    string   `xml:",chardata"`
 		ID      string   `xml:"ID"`
 		DESC    string   `xml:"DESC"`
-		QTY     int64    `xml:"QTY"`
+		QTY     float64  `xml:"QTY"`
 		TAXCODE int64    `xml:"TAXCODE"`
 		AMT     float64  `xml:"AMT"`
 	}
@@ -124,13 +101,6 @@ type (
 		VATRATE    string   `xml:"VATRATE"`
 		NETTAMOUNT float64  `xml:"NETTAMOUNT"`
 		TAXAMOUNT  float64  `xml:"TAXAMOUNT"`
-	}
-
-	RCTEFDMS struct {
-		XMLName        xml.Name `xml:"EFDMS"`
-		Text           string   `xml:",chardata"`
-		RCT            RCT      `xml:"RCT"`
-		EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
 	}
 
 	VATTOTALS struct {

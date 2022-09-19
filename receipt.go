@@ -15,7 +15,73 @@ import (
 
 var ErrReceiptUploadFailed = errors.New("receipt upload failed")
 
+const (
+	NonTaxableItemCode    = 3
+	TaxableItemCode       = 1
+	NonTaxableItemVatCode = "C"
+	TaxableItemVatCode    = "A"
+)
+
 type (
+	// ReceiptParams contains parameters icluded while sending the receipts
+	//<DATE>2019-08-27</DATE>
+	//		<!-- Date of issue of receipt/invoice in the format YYYY-MM-DD-->
+	//		<TIME>08:36:02</TIME>
+	//		<!-- Time of issue of receipt/invoice in the format HH:MM:SS-->
+	//		<TIN>222222286</TIN>
+	//		<!-- Tin of the taxpayer -->
+	//		<REGID>TZ0100089</REGID>
+	//		<!-- Registration number of the VFD -->
+	//		<EFDSERIAL>10TZ1000211</EFDSERIAL>
+	//		<!-- Serial number of VFD -->
+	//		<CUSTIDTYPE>1</CUSTIDTYPE>
+	//		<!-- Customer ID type, values range from 1 to 6 as specified in API document-->
+	//		<CUSTID>111111111</CUSTID>
+	//		<!-- Customer ID based on CUSTIDTYPE specified above-->
+	//		<CUSTNAME></CUSTNAME>
+	//		<!-- Customer name-->
+	//		<MOBILENUM></MOBILENUM>
+	//		<!-- Customer mobile number-->
+	//		<RCTNUM>380</RCTNUM>
+	//		<!-- A receipt/invoice number which is same as GC. It should compose of digits alone i.e. without letters-->
+	//		<DC>1</DC>
+	//		<!-- Daily counter of recipt/invoice which increments for each receipt/invoice and reset to 1 on a new day-->
+	//		<GC>380</GC>
+	//		<!-- Global counter of receipt/invoice which increment throughout the life of the VFD. It has the same value as RCTNUM-->
+	//		<ZNUM>20190827</ZNUM>
+	//		<!-- ZNUM will be a date of receipt/invoice generated as number in format of (YYYYMMDD) -->
+	//		<RCTVNUM>MFT7AB380</RCTVNUM>
+	ReceiptParams struct {
+		Date           string
+		Time           string
+		TIN            string
+		RegistrationID string
+		EFDSerial      string
+		ReceiptNum     string
+		DailyCounter   int64
+		GlobalCounter  int64
+		ZNum           string
+		ReceiptVNum    string
+	}
+
+	// Customer contains customer information
+	Customer struct {
+		Type   CustomerID
+		ID     string
+		Name   string
+		Mobile string
+	}
+
+	// Item represent a purchased item. TaxCode is an integer that can take the
+	// value of 1 for taxable items and 3 for non-taxable items.
+	Item struct {
+		ID          string
+		Description string
+		TaxCode     int64
+		Quantity    float64
+		Price       float64
+		Discount    float64
+	}
 	// ReceiptUploader uploads receipts to the VFD server
 	ReceiptUploader func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 		receipt *models.RCT) (*Response, error)
@@ -148,4 +214,93 @@ func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, 
 		Code:    response.RCTACK.ACKCODE,
 		Message: response.RCTACK.ACKMSG,
 	}, nil
+}
+
+func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, payments []Payment) *models.RCT {
+	vatAmountMap := make(map[string]float64)
+	// add A and C items
+	vatAmountMap["A"] = 0
+	vatAmountMap["C"] = 0
+	rctItems := make([]*models.ITEM, len(items))
+	totals := &models.TOTALS{
+		TOTALTAXEXCL: 0,
+		TOTALTAXINCL: 0,
+		DISCOUNT:     0,
+	}
+	rctVatTotals := make([]*models.VATTOTAL, 0)
+
+	totalTax := 0.0
+
+	for i, item := range items {
+		id := item.ID
+		desc := item.Description
+		qty := item.Quantity
+		price := item.Price
+		taxCode := item.TaxCode
+		discount := item.Discount
+		rctItems[i] = &models.ITEM{
+			ID:      id,
+			DESC:    desc,
+			QTY:     qty,
+			TAXCODE: taxCode,
+			AMT:     price,
+		}
+
+		// add discount
+		totals.DISCOUNT += discount
+
+		// if item is taxable add to total taxCode
+		if taxCode == 1 {
+			// add another entry to the vatAmountMap with key "A"
+			amountInA := vatAmountMap["A"]
+			amountPaidTaxInclusive := price * qty
+			itemTax := amountPaidTaxInclusive * 0.18
+			totalTax += itemTax
+		}
+
+		// add totals tax inclusive
+		totals.TOTALTAXINCL += price * qty
+
+	}
+
+	// add totals tax exclusive
+	totals.TOTALTAXEXCL = totals.TOTALTAXINCL - totalTax
+
+	// make payments
+	rctPayments := make([]*models.PAYMENT, len(payments))
+	for i, payment := range payments {
+		rctPayments[i] = &models.PAYMENT{
+			PMTTYPE:   string(payment.Type),
+			PMTAMOUNT: payment.Amount,
+		}
+	}
+
+	return &models.RCT{
+		DATE:       params.Date,
+		TIME:       params.Time,
+		TIN:        params.TIN,
+		REGID:      params.RegistrationID,
+		EFDSERIAL:  params.EFDSerial,
+		CUSTIDTYPE: int64(customer.Type),
+		CUSTID:     customer.ID,
+		CUSTNAME:   customer.Name,
+		MOBILENUM:  customer.Mobile,
+		RCTNUM:     params.ReceiptNum,
+		DC:         params.DailyCounter,
+		GC:         params.GlobalCounter,
+		ZNUM:       params.ZNum,
+		RCTVNUM:    params.ReceiptVNum,
+		ITEMS: models.ITEMS{
+			ITEM: rctItems,
+		},
+		TOTALS: *totals,
+		PAYMENTS: models.PAYMENTS{
+			PAYMENT: rctPayments,
+		},
+		VATTOTALS: models.VATTOTALS{
+			XMLName:  xml.Name{},
+			Text:     "",
+			VATTOTAL: totals,
+		},
+	}
 }
