@@ -185,10 +185,7 @@ func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, 
 }
 
 func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, payments []Payment) *models.RCT {
-	vatAmountMap := make(map[string]float64)
-	// add A and C items
-	vatAmountMap["A"] = 0
-	vatAmountMap["C"] = 0
+
 	rctItems := make([]*models.ITEM, len(items))
 	totals := &models.TOTALS{
 		TOTALTAXEXCL: 0,
