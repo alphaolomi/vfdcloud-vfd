@@ -264,7 +264,7 @@ func ReportPayloadBytes(privateKey *rsa.PrivateKey, params *ReportParams, addres
 	}
 	payloadString := replacer.Replace(string(payload))
 
-	signedPayload, err := SignPayload(context.Background(), privateKey, []byte(payloadString))
+	signedPayload, err := SignPayload(privateKey, []byte(payloadString))
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign the payload: %w", err)
 	}
