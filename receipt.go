@@ -26,33 +26,6 @@ const (
 
 type (
 	// ReceiptParams contains parameters icluded while sending the receipts
-	//<DATE>2019-08-27</DATE>
-	//		<!-- Date of issue of receipt/invoice in the format YYYY-MM-DD-->
-	//		<TIME>08:36:02</TIME>
-	//		<!-- Time of issue of receipt/invoice in the format HH:MM:SS-->
-	//		<TIN>222222286</TIN>
-	//		<!-- Tin of the taxpayer -->
-	//		<REGID>TZ0100089</REGID>
-	//		<!-- Registration number of the VFD -->
-	//		<EFDSERIAL>10TZ1000211</EFDSERIAL>
-	//		<!-- Serial number of VFD -->
-	//		<CUSTIDTYPE>1</CUSTIDTYPE>
-	//		<!-- Customer ID type, values range from 1 to 6 as specified in API document-->
-	//		<CUSTID>111111111</CUSTID>
-	//		<!-- Customer ID based on CUSTIDTYPE specified above-->
-	//		<CUSTNAME></CUSTNAME>
-	//		<!-- Customer name-->
-	//		<MOBILENUM></MOBILENUM>
-	//		<!-- Customer mobile number-->
-	//		<RCTNUM>380</RCTNUM>
-	//		<!-- A receipt/invoice number which is same as GC. It should compose of digits alone i.e. without letters-->
-	//		<DC>1</DC>
-	//		<!-- Daily counter of recipt/invoice which increments for each receipt/invoice and reset to 1 on a new day-->
-	//		<GC>380</GC>
-	//		<!-- Global counter of receipt/invoice which increment throughout the life of the VFD. It has the same value as RCTNUM-->
-	//		<ZNUM>20190827</ZNUM>
-	//		<!-- ZNUM will be a date of receipt/invoice generated as number in format of (YYYYMMDD) -->
-	//		<RCTVNUM>MFT7AB380</RCTVNUM>
 	ReceiptParams struct {
 		Date           string
 		Time           string
