@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rsa"
+	"encoding/base64"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var ErrReceiptUploadFailed = errors.New("receipt upload failed")
@@ -82,9 +84,16 @@ type (
 		Price       float64
 		Discount    float64
 	}
+
+	ReceiptRequest struct {
+		Params   ReceiptParams
+		Customer Customer
+		Items    []Item
+		Payments []Payment
+	}
 	// ReceiptUploader uploads receipts to the VFD server
 	ReceiptUploader func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-		receipt *models.RCT) (*Response, error)
+		receipt *ReceiptRequest) (*Response, error)
 
 	ReceiptUploadMiddleware func(next ReceiptUploader) ReceiptUploader
 )
@@ -92,7 +101,7 @@ type (
 func VerifyUploadReceiptRequest() ReceiptUploadMiddleware {
 	m := func(next ReceiptUploader) ReceiptUploader {
 		u := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-			receipt *models.RCT) (*Response, error) {
+			receipt *ReceiptRequest) (*Response, error) {
 
 			// Steps:
 			// TODO 1. Verify the request headers
@@ -107,10 +116,10 @@ func VerifyUploadReceiptRequest() ReceiptUploadMiddleware {
 
 // UploadReceipt uploads a receipt to the VFD server.
 func UploadReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *models.RCT, mw ...ReceiptUploadMiddleware) (*Response, error) {
+	rct *ReceiptRequest, mw ...ReceiptUploadMiddleware) (*Response, error) {
 	client := httpClientInstance().client
 	uploader := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-		receipt *models.RCT) (*Response, error) {
+		receipt *ReceiptRequest) (*Response, error) {
 		return uploadReceipt(ctx, client, url, headers, privateKey, receipt)
 	}
 	uploader = wrapReceiptUploaderMiddleware(uploader, VerifyUploadReceiptRequest())
@@ -134,7 +143,7 @@ func wrapReceiptUploaderMiddleware(uploader ReceiptUploader, mw ...ReceiptUpload
 }
 
 func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *models.RCT) (*Response, error) {
+	rct *ReceiptRequest) (*Response, error) {
 	var (
 		contentType = headers.ContentType
 		routingKey  = headers.RoutingKey
@@ -145,27 +154,14 @@ func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, 
 	newContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	out, err := xml.Marshal(rct)
-	if err != nil {
-		return nil, err
-	}
+	payload, err := ReceiptPayloadBytes(
+		privateKey, rct.Params, rct.Customer, rct.Items, rct.Payments)
 
-	signedPayload, err := Sign(privateKey, out)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
-	signedPayloadBase64 := EncodeBase64Bytes(signedPayload)
-	requestPayload := models.RCTEFDMS{
-		RCT:            *rct,
-		EFDMSSIGNATURE: signedPayloadBase64,
-	}
 
-	out, err = xml.Marshal(&requestPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL, bytes.NewBuffer(out))
+	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +182,7 @@ func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, 
 		}
 	}(resp.Body)
 
-	out, err = io.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
@@ -228,7 +224,11 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 		DISCOUNT:     0,
 	}
 	rctVatTotals := make([]*models.VATTOTAL, 0)
-
+	vt := &models.VATTOTAL{
+		VATRATE:    "A",
+		NETTAMOUNT: 0,
+		TAXAMOUNT:  0,
+	}
 	totalTax := 0.0
 
 	for i, item := range items {
@@ -248,18 +248,15 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 
 		// add discount
 		totals.DISCOUNT += discount
+		amountPaidTaxInclusive := price * qty
+		itemTax := amountPaidTaxInclusive * 0.18
+		amountPaidWithoutTax := amountPaidTaxInclusive - itemTax
+		totalTax += itemTax
 
-		// if item is taxable add to total taxCode
-		if taxCode == 1 {
-			// add another entry to the vatAmountMap with key "A"
-			amountInA := vatAmountMap["A"]
-			amountPaidTaxInclusive := price * qty
-			itemTax := amountPaidTaxInclusive * 0.18
-			totalTax += itemTax
-		}
-
+		vt.TAXAMOUNT += itemTax
+		vt.NETTAMOUNT += amountPaidWithoutTax
 		// add totals tax inclusive
-		totals.TOTALTAXINCL += price * qty
+		totals.TOTALTAXINCL += amountPaidTaxInclusive
 
 	}
 
@@ -274,6 +271,9 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 			PMTAMOUNT: payment.Amount,
 		}
 	}
+
+	// add vat totals
+	rctVatTotals = append(rctVatTotals, vt)
 
 	return &models.RCT{
 		DATE:       params.Date,
@@ -298,9 +298,33 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 			PAYMENT: rctPayments,
 		},
 		VATTOTALS: models.VATTOTALS{
-			XMLName:  xml.Name{},
-			Text:     "",
-			VATTOTAL: totals,
+			VATTOTAL: rctVatTotals,
 		},
 	}
+}
+
+func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer, items []Item, payments []Payment) ([]byte, error) {
+	receipt := GenerateReceipt(params, customer, items, payments)
+	receiptBytes, err := xml.Marshal(receipt)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal receipt: %w", err)
+	}
+	replacer := strings.NewReplacer(
+		"<PAYMENT>", "",
+		"</PAYMENT>", "",
+		"<VATTOTAL>", "",
+		"</VATTOTAL>", "")
+
+	receiptBytes = []byte(replacer.Replace(string(receiptBytes)))
+	signedReceipt, err := Sign(privateKey, receiptBytes)
+	if err != nil {
+		return nil, fmt.Errorf("could not sign receipt: %w", err)
+	}
+	base64SignedReceipt := base64.StdEncoding.EncodeToString(signedReceipt)
+	receiptString := string(receiptBytes)
+
+	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", receiptString, base64SignedReceipt)
+	report = fmt.Sprintf("%s%s", xml.Header, report)
+
+	return []byte(report), nil
 }
