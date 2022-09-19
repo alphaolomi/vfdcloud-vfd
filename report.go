@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rsa"
+	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"github.com/vfdcloud/vfd/models"
@@ -48,16 +49,19 @@ type (
 		EFDSerial        string
 		RegistrationDate string
 		User             string
-		SIMIMSI          string
-		VATChangeNum     int64
-		HeadChangeNum    int64
-		FirmwareVersion  string
-		FirmwareChecksum string
+	}
+
+	ReportRequest struct {
+		Params  *ReportParams
+		Address *Address
+		Totals  *ReportTotals
+		VATS    []VatTotal
+		Payment []Payment
 	}
 
 	ReportSubmitter func(ctx context.Context, url string, headers *RequestHeaders,
 		privateKey *rsa.PrivateKey,
-		report *models.Report) (*Response, error)
+		report *ReportRequest) (*Response, error)
 
 	ReportSubmitMiddleware func(next ReportSubmitter) ReportSubmitter
 )
@@ -77,7 +81,7 @@ func wrapReportSubmitterMiddleware(submitter ReportSubmitter, mw ...ReportSubmit
 // submitReport submits a report to the VFD server.
 func submitReport(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,
 	privateKey *rsa.PrivateKey,
-	report *models.Report) (*Response, error) {
+	report *ReportRequest) (*Response, error) {
 	var (
 		contentType = headers.ContentType
 		routingKey  = headers.RoutingKey
@@ -88,27 +92,12 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 	newContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	out, err := xml.Marshal(report)
+	payload, err := ReportPayloadBytes(privateKey, report.Params, *report.Address, report.VATS, report.Payment, *report.Totals)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to generate the report payload: %w", err)
 	}
 
-	signedPayload, err := Sign(ctx, privateKey, out)
-	if err != nil {
-		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
-	}
-	signedPayloadBase64 := EncodeBase64Bytes(signedPayload)
-	requestPayload := models.ReportEFDMS{
-		ZREPORT:        *report,
-		EFDMSSIGNATURE: signedPayloadBase64,
-	}
-
-	out, err = xml.Marshal(&requestPayload)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL, bytes.NewBuffer(out))
+	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +118,7 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 		}
 	}(resp.Body)
 
-	out, err = io.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReportSubmitFailed, err)
 	}
@@ -160,10 +149,10 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 }
 
 func SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	report *models.Report, mw ...ReportSubmitMiddleware) (*Response, error) {
+	report *ReportRequest, mw ...ReportSubmitMiddleware) (*Response, error) {
 	client := httpClientInstance().client
 	submitter := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-		report *models.Report) (*Response, error) {
+		report *ReportRequest) (*Response, error) {
 		return submitReport(ctx, client, url, headers, privateKey, report)
 	}
 	submitter = wrapReportSubmitterMiddleware(submitter, mw...)
@@ -262,7 +251,7 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 // ReportPayloadBytes returns the bytes of the report payload. It calls xml.Marshal on the report.
 // then replace all the occurrences of <PAYMENT>, </PAYMENT>, <VATTOTAL>, </VATTOTAL> with empty string ""
 // and then add the xml.Header to the beginning of the payload.
-func ReportPayloadBytes(params *ReportParams, address Address, vats []VatTotal, payments []Payment,
+func ReportPayloadBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address, vats []VatTotal, payments []Payment,
 	totals ReportTotals) ([]byte, error) {
 	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}
 	replacer := strings.NewReplacer(replaceList...)
@@ -271,7 +260,15 @@ func ReportPayloadBytes(params *ReportParams, address Address, vats []VatTotal, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal the report: %w", err)
 	}
-	payload = []byte(replacer.Replace(string(payload)))
-	payload = append([]byte(xml.Header), payload...)
-	return payload, nil
+	payloadString := replacer.Replace(string(payload))
+
+	signedPayload, err := SignPayload(context.Background(), privateKey, []byte(payloadString))
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign the payload: %w", err)
+	}
+	base64PayloadSignature := base64.StdEncoding.EncodeToString(signedPayload)
+	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", payloadString, base64PayloadSignature)
+	report = fmt.Sprintf("%s%s", xml.Header, report)
+
+	return []byte(report), nil
 }

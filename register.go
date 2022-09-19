@@ -81,7 +81,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		return nil, fmt.Errorf("%v: failed to marshal registration body: %w", ErrRegistrationFailed, err)
 	}
 
-	signedPayload, err := Sign(ctx, privateKey, out)
+	signedPayload, err := Sign(privateKey, out)
 	if err != nil {
 		return nil, err
 	}

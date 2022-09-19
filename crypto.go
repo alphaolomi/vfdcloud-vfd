@@ -37,10 +37,7 @@ func LoadCert(ctx context.Context, certPath string, certPassword string) (
 	return crypto.ParsePfxCertificate(certPath, certPassword)
 }
 
-func Sign(ctx context.Context, privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {
-	_, cancel := context.WithCancel(ctx)
-	defer cancel()
-
+func Sign(privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {
 	signature, err := crypto.SignPayload(privateKey, payload)
 	if err != nil {
 		return nil, fmt.Errorf("unable to sign the payload: %w", err)

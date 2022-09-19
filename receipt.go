@@ -84,7 +84,7 @@ func uploadReceipt(ctx context.Context, client *http.Client, requestURL string, 
 		return nil, err
 	}
 
-	signedPayload, err := Sign(ctx, privateKey, out)
+	signedPayload, err := Sign(privateKey, out)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
