@@ -84,41 +84,25 @@ type (
 		// Registering a VFD is a one-time operation. The subsequent calls to Register will
 		// yield the same response.VFD should store the registration response to
 		// avoid calling Register again.
-		Register(
-			ctx context.Context,
-			url string,
-			request *RegistrationRequest,
-		) (*models.RegistrationResponse, error)
+		Register(ctx context.Context, url string, request *RegistrationRequest) (*models.RegistrationResponse, error)
 
 		// FetchToken is used to fetch a token from the VFD Service. The token is used
 		// to authenticate the VFD when submitting receipts and Z reports.
 		// credentials used here are the ones returned by the Register method.
-		FetchToken(
-			ctx context.Context,
-			url string,
-			request *TokenRequest,
-		) (*TokenResponse, error)
+		FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error)
 
 		// SubmitReceipt is used to submit a receipt to the VFD Service. The receipt
 		// is signed using the private key. The private key is obtained from the certificate
 		// issued by the Revenue Authority during integration.
 		SubmitReceipt(
-			ctx context.Context,
-			url string,
-			headers *RequestHeaders,
-			privateKey *rsa.PrivateKey,
-			receipt *models.RCT,
-		) (*Response, error)
+			ctx context.Context, url string, headers *RequestHeaders,
+			privateKey *rsa.PrivateKey, receipt *models.RCT) (*Response, error)
 
 		// SubmitReport is used to submit a Z report to the VFD Service. The Z report
 		// is signed using the private key. The private key is obtained from the certificate
 		// issued by the Revenue Authority during integration.
 		SubmitReport(
-			ctx context.Context,
-			url string,
-			headers *RequestHeaders,
-			privateKey *rsa.PrivateKey,
-			report *models.Report,
-		) (*Response, error)
+			ctx context.Context, url string, headers *RequestHeaders,
+			privateKey *rsa.PrivateKey, report *models.Report) (*Response, error)
 	}
 )
