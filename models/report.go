@@ -23,15 +23,6 @@ type (
 		ZACK           ZACK     `xml:"ZACK"`
 		EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
 	}
-	ReportEFDMS struct {
-		XMLName        xml.Name `xml:"EFDMS"`
-		Text           string   `xml:",chardata"`
-		ZREPORT        Report   `xml:"ZREPORT"`
-		EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
-	}
-	// Address ...
-
-	Report struct{}
 
 	ZREPORT struct {
 		XMLName xml.Name `xml:"ZREPORT"`

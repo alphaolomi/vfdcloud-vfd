@@ -68,7 +68,3 @@ type Error struct {
 	Text    string   `xml:",chardata"`
 	Message string   `xml:"Message"`
 }
-
-func (regBody *RegistrationBody) Validate() error {
-	return nil
-}

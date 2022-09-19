@@ -4,24 +4,7 @@ import (
 	"encoding/xml"
 )
 
-const (
-	CASH    = PMTYPE("CASH")
-	CHEQUE  = PMTYPE("CHEQUE")
-	EMONEY  = PMTYPE("EMONEY")
-	CCARD   = PMTYPE("CCARD")
-	INVOICE = PMTYPE("INVOICE")
-)
-
 type (
-
-	// PMTYPE this represents acceptable mode of payment in API referred to as Mode of Payment
-	// or Type of Payment
-	// Mode of Payment can either be CASH, CHEQUE, EMONEY or CCARD if receipt is generated. In
-	// this case payment is already received
-	// Mode of Payment can only be INVOICE if invoice is generated.  In this case payment is not
-	// yet received that is why we use Invoice
-	PMTYPE string
-
 	// RCTACK is the receipt acknowledge received from
 	// vfd server after successfully receipt upload request
 	RCTACK struct {
@@ -64,13 +47,6 @@ type (
 		VATTOTALS  VATTOTALS `xml:"VATTOTALS"`
 	}
 
-	PAYMENT struct {
-		XMLName   xml.Name `xml:"PAYMENT"`
-		Text      string   `xml:",chardata"`
-		PMTTYPE   string   `xml:"PMTTYPE"`
-		PMTAMOUNT float64  `xml:"PMTAMOUNT"`
-	}
-
 	ITEMS struct {
 		XMLName xml.Name `xml:"ITEMS"`
 		Text    string   `xml:",chardata"`
@@ -107,6 +83,13 @@ type (
 		XMLName  xml.Name    `xml:"VATTOTALS"`
 		Text     string      `xml:",chardata"`
 		VATTOTAL []*VATTOTAL `xml:"VATTOTAL"`
+	}
+
+	PAYMENT struct {
+		XMLName   xml.Name `xml:"PAYMENT"`
+		Text      string   `xml:",chardata"`
+		PMTTYPE   string   `xml:"PMTTYPE"`
+		PMTAMOUNT float64  `xml:"PMTAMOUNT"`
 	}
 
 	PAYMENTS struct {
