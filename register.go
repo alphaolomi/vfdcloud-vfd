@@ -52,7 +52,7 @@ func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey
 
 	registrar := func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
 		request *RegistrationRequest) (*models.RegistrationResponse, error) {
-		client := httpClientInstance().client
+		client := getHttpClientInstance().client
 		return register(ctx, client, url, privateKey, request)
 	}
 

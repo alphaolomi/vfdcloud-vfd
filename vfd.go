@@ -74,9 +74,6 @@ type (
 		Message string `json:"message,omitempty"`
 	}
 
-	// LoadCertFunc is a function that loads a certificate from a pfx file from the given path.
-	// returns the private key and the certificate.
-
 	Service interface {
 		// Register is used to register a virtual fiscal device (VFD) with the VFD Service.
 		// If successful, the VFD Service returns a registration response containing the

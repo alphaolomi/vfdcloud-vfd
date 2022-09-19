@@ -25,7 +25,7 @@ var (
 	instance *httpx
 )
 
-func httpClientInstance() *httpx {
+func getHttpClientInstance() *httpx {
 	once.Do(func() {
 		instance = defaultHTTPClient()
 	})

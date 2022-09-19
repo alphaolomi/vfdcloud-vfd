@@ -75,7 +75,7 @@ func wrapTokenFetcherMiddlewares(fetcher TokenFetcher, mw ...TokenFetcherMiddlew
 func FetchToken(ctx context.Context, url string, request *TokenRequest, mw []TokenFetcherMiddleware) (
 	*TokenResponse, error) {
 	f := func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
-		httpClient := httpClientInstance().client
+		httpClient := getHttpClientInstance().client
 		return fetchToken(ctx, httpClient, url, request)
 	}
 	fetcher := wrapTokenFetcherMiddlewares(f, mw...)

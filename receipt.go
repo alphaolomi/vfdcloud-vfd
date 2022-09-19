@@ -90,7 +90,7 @@ func VerifyUploadReceiptRequest() ReceiptUploadMiddleware {
 // UploadReceipt uploads a receipt to the VFD server.
 func UploadReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	rct *ReceiptRequest, mw ...ReceiptUploadMiddleware) (*Response, error) {
-	client := httpClientInstance().client
+	client := getHttpClientInstance().client
 	uploader := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 		receipt *ReceiptRequest) (*Response, error) {
 		return uploadReceipt(ctx, client, url, headers, privateKey, receipt)

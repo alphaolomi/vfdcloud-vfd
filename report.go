@@ -150,7 +150,7 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 
 func SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	report *ReportRequest, mw ...ReportSubmitMiddleware) (*Response, error) {
-	client := httpClientInstance().client
+	client := getHttpClientInstance().client
 	submitter := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 		report *ReportRequest) (*Response, error) {
 		return submitReport(ctx, client, url, headers, privateKey, report)
