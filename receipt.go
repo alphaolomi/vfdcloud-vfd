@@ -245,7 +245,7 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 	// add vat totals
 	rctVatTotals = append(rctVatTotals, vt)
 
-	return &models.RCT{
+	rct := &models.RCT{
 		DATE:       params.Date,
 		TIME:       params.Time,
 		TIN:        params.TIN,
@@ -271,6 +271,11 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 			VATTOTAL: rctVatTotals,
 		},
 	}
+
+	// round off all values to 2 decimal places
+	rct.RoundOff()
+
+	return rct
 }
 
 func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer, items []Item, payments []Payment) ([]byte, error) {

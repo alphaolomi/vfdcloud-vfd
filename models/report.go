@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/xml"
+	"math"
 )
 
 type (
@@ -69,3 +70,14 @@ type (
 		TICKETSNONFISCAL int64    `xml:"TICKETSNONFISCAL"`
 	}
 )
+
+// RoundOff is a helper function to round off all the ZREPORT values with data type
+// float64 to 2 decimal places
+func (z *ZREPORT) RoundOff() {
+	z.TOTALS.DAILYTOTALAMOUNT = math.Floor(z.TOTALS.DAILYTOTALAMOUNT*100) / 100
+	z.TOTALS.GROSS = math.Floor(z.TOTALS.GROSS*100) / 100
+	z.TOTALS.CORRECTIONS = math.Floor(z.TOTALS.CORRECTIONS*100) / 100
+	z.TOTALS.DISCOUNTS = math.Floor(z.TOTALS.DISCOUNTS*100) / 100
+	z.TOTALS.SURCHARGES = math.Floor(z.TOTALS.SURCHARGES*100) / 100
+	z.TOTALS.TICKETSVOIDTOTAL = math.Floor(z.TOTALS.TICKETSVOIDTOTAL*100) / 100
+}

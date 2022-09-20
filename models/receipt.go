@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/xml"
+	"math"
 )
 
 type (
@@ -98,3 +99,23 @@ type (
 		PAYMENT []*PAYMENT `xml:"PAYMENT"`
 	}
 )
+
+// RoundOff is a helper function to round off the all the values of RCT with float64 as a Data Type
+// to 2 decimal places
+func (r *RCT) RoundOff() {
+	// RoundOff all the RCT.TOTALS
+	r.TOTALS.TOTALTAXEXCL = math.Floor(r.TOTALS.TOTALTAXEXCL*100) / 100
+	r.TOTALS.TOTALTAXINCL = math.Floor(r.TOTALS.TOTALTAXINCL*100) / 100
+	r.TOTALS.DISCOUNT = math.Floor(r.TOTALS.DISCOUNT*100) / 100
+
+	// RoundOff all the RCT.PAYMENTS
+	for _, p := range r.PAYMENTS.PAYMENT {
+		p.PMTAMOUNT = math.Floor(p.PMTAMOUNT*100) / 100
+	}
+
+	// RoundOff all the RCT.VATTOTALS
+	for _, v := range r.VATTOTALS.VATTOTAL {
+		v.NETTAMOUNT = math.Floor(v.NETTAMOUNT*100) / 100
+		v.TAXAMOUNT = math.Floor(v.TAXAMOUNT*100) / 100
+	}
+}

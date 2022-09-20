@@ -209,7 +209,7 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 		TICKETSFISCAL:    totals.TicketsFiscal,
 		TICKETSNONFISCAL: totals.TicketsNonFiscal,
 	}
-	return &models.ZREPORT{
+	report := &models.ZREPORT{
 		XMLName: xml.Name{},
 		Text:    "",
 		DATE:    params.Date,
@@ -248,6 +248,10 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 		FWVERSION:  FWVERSION,
 		FWCHECKSUM: FWCHECKSUM,
 	}
+
+	report.RoundOff()
+
+	return report
 }
 
 // ReportPayloadBytes returns the bytes of the report payload. It calls xml.Marshal on the report.
