@@ -104,7 +104,7 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Routing-Key", routingKey)
-	req.Header.Set("Cert-Serial", certSerial)
+	req.Header.Set("Cert-Serial", EncodeBase64String(certSerial))
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
 
 	resp, err := client.Do(req)
