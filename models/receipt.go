@@ -109,13 +109,14 @@ func (r *RCT) RoundOff() {
 	r.TOTALS.DISCOUNT = math.Floor(r.TOTALS.DISCOUNT*100) / 100
 
 	// RoundOff all the RCT.PAYMENTS
-	for _, p := range r.PAYMENTS.PAYMENT {
-		p.PMTAMOUNT = math.Floor(p.PMTAMOUNT*100) / 100
+	for i := 0; i < len(r.PAYMENTS.PAYMENT); i++ {
+		r.PAYMENTS.PAYMENT[i].PMTAMOUNT = math.Floor(r.PAYMENTS.PAYMENT[i].PMTAMOUNT*100) / 100
 	}
 
 	// RoundOff all the RCT.VATTOTALS
-	for _, v := range r.VATTOTALS.VATTOTAL {
-		v.NETTAMOUNT = math.Floor(v.NETTAMOUNT*100) / 100
-		v.TAXAMOUNT = math.Floor(v.TAXAMOUNT*100) / 100
+	for i := 0; i < len(r.VATTOTALS.VATTOTAL); i++ {
+		r.VATTOTALS.VATTOTAL[i].NETTAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].NETTAMOUNT*100) / 100
+		r.VATTOTALS.VATTOTAL[i].TAXAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].TAXAMOUNT*100) / 100
 	}
+
 }
