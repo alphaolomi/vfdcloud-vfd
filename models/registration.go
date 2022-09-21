@@ -32,7 +32,7 @@ type RegistrationResponse struct {
 	RECEIPTCODE string   `xml:"RECEIPTCODE"`
 	REGION      string   `xml:"REGION"`
 	ROUTINGKEY  string   `xml:"ROUTINGKEY"`
-	GC          string   `xml:"GC"`
+	GC          int64    `xml:"GC"`
 	TAXOFFICE   string   `xml:"TAXOFFICE"`
 	USERNAME    string   `xml:"USERNAME"`
 	PASSWORD    string   `xml:"PASSWORD"`
