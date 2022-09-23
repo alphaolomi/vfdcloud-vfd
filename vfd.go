@@ -3,6 +3,7 @@ package vfd
 import (
 	"context"
 	"crypto/rsa"
+
 	"github.com/vfdcloud/vfd/models"
 )
 

@@ -8,12 +8,13 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/vfdcloud/base"
-	"github.com/vfdcloud/vfd/models"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/vfdcloud/base"
+	"github.com/vfdcloud/vfd/models"
 )
 
 var ErrReceiptUploadFailed = errors.New("receipt upload failed")
@@ -75,8 +76,8 @@ type (
 func VerifyUploadReceiptRequest() ReceiptSubmitMiddleware {
 	m := func(next ReceiptSubmitter) ReceiptSubmitter {
 		u := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-			receipt *ReceiptRequest) (*Response, error) {
-
+			receipt *ReceiptRequest,
+		) (*Response, error) {
 			// Steps:
 			// TODO 1. Verify the request headers
 			// TODO 2. verify request URL
@@ -90,10 +91,12 @@ func VerifyUploadReceiptRequest() ReceiptSubmitMiddleware {
 
 // SubmitReceipt uploads a receipt to the VFD server.
 func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *ReceiptRequest, mw ...ReceiptSubmitMiddleware) (*Response, error) {
+	rct *ReceiptRequest, mw ...ReceiptSubmitMiddleware,
+) (*Response, error) {
 	client := getHttpClientInstance().client
 	uploader := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-		receipt *ReceiptRequest) (*Response, error) {
+		receipt *ReceiptRequest,
+	) (*Response, error) {
 		return submitReceipt(ctx, client, url, headers, privateKey, receipt)
 	}
 	uploader = wrapReceiptSubmitMiddlewares(uploader, VerifyUploadReceiptRequest())
@@ -116,7 +119,8 @@ func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmit
 }
 
 func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *ReceiptRequest) (*Response, error) {
+	rct *ReceiptRequest,
+) (*Response, error) {
 	var (
 		contentType = headers.ContentType
 		routingKey  = headers.RoutingKey
@@ -129,7 +133,6 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 
 	payload, err := ReceiptPayloadBytes(
 		privateKey, rct.Params, rct.Customer, rct.Items, rct.Payments)
-
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
@@ -186,7 +189,6 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 }
 
 func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, payments []Payment) *models.RCT {
-
 	rctItems := make([]*models.ITEM, len(items))
 	totals := &models.TOTALS{
 		TOTALTAXEXCL: 0,

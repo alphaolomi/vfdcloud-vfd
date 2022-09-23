@@ -7,11 +7,12 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 	"fmt"
-	"github.com/vfdcloud/vfd/models"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/vfdcloud/vfd/models"
 )
 
 var ErrReportSubmitFailed = fmt.Errorf("report submit failed")
@@ -75,13 +76,15 @@ func wrapReportSubmitterMiddleware(submitter ReportSubmitter, mw ...ReportSubmit
 	for i := len(mw) - 1; i >= 0; i-- {
 		submitter = mw[i](submitter)
 	}
+
 	return submitter
 }
 
 // submitReport submits a report to the VFD server.
 func submitReport(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,
 	privateKey *rsa.PrivateKey,
-	report *ReportRequest) (*Response, error) {
+	report *ReportRequest,
+) (*Response, error) {
 	var (
 		contentType = headers.ContentType
 		routingKey  = headers.RoutingKey
@@ -92,7 +95,9 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 	newContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	payload, err := ReportPayloadBytes(privateKey, report.Params, *report.Address, report.VATS, report.Payment, *report.Totals)
+	payload, err := ReportPayloadBytes(
+		privateKey, report.Params, *report.Address, report.VATS,
+		report.Payment, *report.Totals)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate the report payload: %w", err)
 	}
@@ -149,10 +154,12 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 }
 
 func SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	report *ReportRequest, mw ...ReportSubmitMiddleware) (*Response, error) {
+	report *ReportRequest, mw ...ReportSubmitMiddleware,
+) (*Response, error) {
 	client := getHttpClientInstance().client
 	submitter := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-		report *ReportRequest) (*Response, error) {
+		report *ReportRequest,
+	) (*Response, error) {
 		return submitReport(ctx, client, url, headers, privateKey, report)
 	}
 	submitter = wrapReportSubmitterMiddleware(submitter, mw...)
@@ -164,7 +171,8 @@ func (lines *Address) AsList() []string {
 		strings.ToUpper(lines.Name),
 		strings.ToUpper(lines.Street),
 		fmt.Sprintf("MOBILE: %s", lines.Mobile),
-		strings.ToUpper(fmt.Sprintf("%s,%s", lines.City, lines.Country))}
+		strings.ToUpper(fmt.Sprintf("%s,%s", lines.City, lines.Country)),
+	}
 }
 
 func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, payments []Payment, totals ReportTotals) *models.ZREPORT {
@@ -258,7 +266,8 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 // then replace all the occurrences of <PAYMENT>, </PAYMENT>, <VATTOTAL>, </VATTOTAL> with empty string ""
 // and then add the xml.Header to the beginning of the payload.
 func ReportPayloadBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address, vats []VatTotal, payments []Payment,
-	totals ReportTotals) ([]byte, error) {
+	totals ReportTotals,
+) ([]byte, error) {
 	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}
 	replacer := strings.NewReplacer(replaceList...)
 	zReport := GenerateZReport(params, address, vats, payments, totals)

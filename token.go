@@ -62,7 +62,6 @@ func wrapTokenFetcherMiddlewares(fetcher TokenFetcher, mw ...TokenFetcherMiddlew
 	}
 
 	return fetcher
-
 }
 
 // FetchToken retrieves a token from the VFD server. If the status code is not 200, an error is
@@ -73,7 +72,8 @@ func wrapTokenFetcherMiddlewares(fetcher TokenFetcher, mw ...TokenFetcherMiddlew
 // It is a context-aware function with a timeout of 1 minute. Middlewares can be passed to wrap the
 // fetcher with additional functionality. The middlewares are executed in the order they are passed.
 func FetchToken(ctx context.Context, url string, request *TokenRequest, mw []TokenFetcherMiddleware) (
-	*TokenResponse, error) {
+	*TokenResponse, error,
+) {
 	f := func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
 		httpClient := getHttpClientInstance().client
 		return fetchToken(ctx, httpClient, url, request)
@@ -95,13 +95,12 @@ func fetchToken(ctx context.Context, client *http.Client, path string, request *
 	// this request should have a max of 1 Minute timeout
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer cancel()
-	var form = url.Values{}
+	form := url.Values{}
 	form.Set("username", username)
 	form.Set("password", password)
 	form.Set("grant_type", grantType)
 	buffer := bytes.NewBufferString(form.Encode())
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, buffer)
-
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", ErrFetchToken, err)
 	}

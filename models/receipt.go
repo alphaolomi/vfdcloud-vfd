@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+const hundred = 100
+
 type (
 	// RCTACK is the receipt acknowledge received from
 	// vfd server after successfully receipt upload request
@@ -101,22 +103,21 @@ type (
 )
 
 // RoundOff is a helper function to round off the all the values of RCT with float64 as a Data Type
-// to 2 decimal places
+// to 2 decimal places.
 func (r *RCT) RoundOff() {
 	// RoundOff all the RCT.TOTALS
-	r.TOTALS.TOTALTAXEXCL = math.Floor(r.TOTALS.TOTALTAXEXCL*100) / 100
-	r.TOTALS.TOTALTAXINCL = math.Floor(r.TOTALS.TOTALTAXINCL*100) / 100
-	r.TOTALS.DISCOUNT = math.Floor(r.TOTALS.DISCOUNT*100) / 100
+	r.TOTALS.TOTALTAXEXCL = math.Floor(r.TOTALS.TOTALTAXEXCL*hundred) / hundred
+	r.TOTALS.TOTALTAXINCL = math.Floor(r.TOTALS.TOTALTAXINCL*hundred) / hundred
+	r.TOTALS.DISCOUNT = math.Floor(r.TOTALS.DISCOUNT*hundred) / hundred
 
 	// RoundOff all the RCT.PAYMENTS
 	for i := 0; i < len(r.PAYMENTS.PAYMENT); i++ {
-		r.PAYMENTS.PAYMENT[i].PMTAMOUNT = math.Floor(r.PAYMENTS.PAYMENT[i].PMTAMOUNT*100) / 100
+		r.PAYMENTS.PAYMENT[i].PMTAMOUNT = math.Floor(r.PAYMENTS.PAYMENT[i].PMTAMOUNT*hundred) / hundred
 	}
 
 	// RoundOff all the RCT.VATTOTALS
 	for i := 0; i < len(r.VATTOTALS.VATTOTAL); i++ {
-		r.VATTOTALS.VATTOTAL[i].NETTAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].NETTAMOUNT*100) / 100
-		r.VATTOTALS.VATTOTAL[i].TAXAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].TAXAMOUNT*100) / 100
+		r.VATTOTALS.VATTOTAL[i].NETTAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].NETTAMOUNT*hundred) / hundred
+		r.VATTOTALS.VATTOTAL[i].TAXAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].TAXAMOUNT*hundred) / hundred
 	}
-
 }

@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
+
 	"github.com/vfdcloud/base/crypto"
 )
 
@@ -23,7 +24,8 @@ type (
 )
 
 func LoadCert(certPath string, certPassword string) (
-	*rsa.PrivateKey, *x509.Certificate, error) {
+	*rsa.PrivateKey, *x509.Certificate, error,
+) {
 	return crypto.ParsePfxCertificate(certPath, certPassword)
 }
 

@@ -48,10 +48,11 @@ func wrapRegistrationMiddleware(registrar Registrar, mw ...RegistrationMiddlewar
 // registration request is signed with the private key of the certificate used to
 // authenticate the client.
 func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey,
-	request *RegistrationRequest, mw []RegistrationMiddleware) (*models.RegistrationResponse, error) {
-
+	request *RegistrationRequest, mw []RegistrationMiddleware,
+) (*models.RegistrationResponse, error) {
 	registrar := func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
-		request *RegistrationRequest) (*models.RegistrationResponse, error) {
+		request *RegistrationRequest,
+	) (*models.RegistrationResponse, error) {
 		client := getHttpClientInstance().client
 		return register(ctx, client, url, privateKey, request)
 	}
@@ -62,7 +63,8 @@ func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey
 }
 
 func register(ctx context.Context, client *http.Client, requestURL string, privateKey *rsa.PrivateKey,
-	request *RegistrationRequest) (*models.RegistrationResponse, error) {
+	request *RegistrationRequest,
+) (*models.RegistrationResponse, error) {
 	var (
 		taxIdNumber = request.Tin
 		certKey     = request.CertKey

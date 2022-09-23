@@ -1,10 +1,11 @@
 package vfd
 
 import (
-	"github.com/vfdcloud/base"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/vfdcloud/base"
 )
 
 var (
