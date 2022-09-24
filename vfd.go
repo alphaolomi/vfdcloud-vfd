@@ -9,12 +9,12 @@ import (
 
 const (
 	RegisterProductionURL                  = "https://vfd.tra.go.tz/api/vfdRegReq"
-	FetchTokenProductionURL                = "https://vfd.tra.go.tz/vfdtoken"
+	FetchTokenProductionURL                = "https://vfd.tra.go.tz/vfdtoken" //nolint:gosec
 	SubmitReceiptProductionURL             = "https://vfd.tra.go.tz/api/efdmsRctInfo"
 	SubmitReportProductionURL              = "https://vfd.tra.go.tz/api/efdmszreport"
 	VerifyReceiptProductionURL             = "https://verify.tra.go.tz/"
 	RegisterTestingURL                     = "https://virtual.tra.go.tz/efdmsRctApi/api/vfdRegReq"
-	FetchTokenTestingURL                   = "https://virtual.tra.go.tz/efdmsRctApi/vfdtoken"
+	FetchTokenTestingURL                   = "https://virtual.tra.go.tz/efdmsRctApi/vfdtoken" //nolint:gosec
 	SubmitReceiptTestingURL                = "https://virtual.tra.go.tz/efdmsRctApi/api/efdmsRctInfo"
 	SubmitReportTestingURL                 = "https://virtual.tra.go.tz/efdmsRctApi/api/efdmszreport"
 	VerifyReceiptTestingURL                = "https://virtual.tra.go.tz/efdmsRctVerify/"
@@ -23,18 +23,18 @@ const (
 	SubmitReceiptAction        Action      = "receipt"
 	SubmitReportAction         Action      = "report"
 	ReceiptVerificationAction  Action      = "verification"
-	StandardVatrateId                      = "A"
-	StandardVatrate                        = 18
+	StandardVATRATEID                      = "A"
+	StandardVATRATE                        = 18
 	CashPaymentType            PaymentType = "CASH"
 	CreditCardPaymentType      PaymentType = "CCARD"
 	ChequePaymentType          PaymentType = "CHEQUE"
 	InvoicePaymentType         PaymentType = "INVOICE"
 	ElectronicPaymentType      PaymentType = "EMONEY"
-	TinCustomerID              CustomerID  = 1
+	TINCustomerID              CustomerID  = 1
 	LicenceCustomerID          CustomerID  = 2
 	VoterIDCustomerID          CustomerID  = 3
 	PassportCustomerID         CustomerID  = 4
-	NidaCustomerID             CustomerID  = 5
+	NIDACustomerID             CustomerID  = 5
 	NonCustomerID              CustomerID  = 6
 	MeterNumberCustomerID      CustomerID  = 7
 )
@@ -42,7 +42,7 @@ const (
 type (
 	// Action signifies the action to be performed among the four defined actions
 	// which are client registration, token fetching, submission of receipt and
-	// submission of report
+	// submission of report.
 	Action     string
 	requestURL struct {
 		Registration  string
@@ -52,7 +52,7 @@ type (
 		VerifyReceipt string
 	}
 	// PaymentType represent the type of payment that is recognized by the VFD server
-	// There are five types of payments: CASH, CHEQUE, CCARD, EMONEY and INVOICE
+	// There are five types of payments: CASH, CHEQUE, CCARD, EMONEY and INVOICE.
 	PaymentType string
 
 	// CustomerID is the type of ID the customer used during purchase
@@ -64,7 +64,7 @@ type (
 	CustomerID int
 
 	// RequestHeaders represent collection of request headers during receipt or Z report
-	// sending via VFD Service
+	// sending via VFD Service.
 	RequestHeaders struct {
 		ContentType string
 		CertSerial  string
@@ -79,7 +79,7 @@ type (
 
 	// VatTotal contains information about how much VAT rate was used
 	// Standard VAT rate is 18%
-	// e.g VatTotal{ID:"A",Rate: 18, Amount: 1000}
+	// e.g VatTotal{ID:"A",Rate: 18, Amount: 1000}.
 	VatTotal struct {
 		ID     string
 		Rate   float64

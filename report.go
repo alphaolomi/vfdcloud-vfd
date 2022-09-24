@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/vfdcloud/vfd/models"
@@ -116,19 +115,14 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReportSubmitFailed, err)
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "failed to close the body %v", err)
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	out, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReportSubmitFailed, err)
 	}
 
-	if resp.StatusCode == 500 {
+	if resp.StatusCode == http.StatusInternalServerError {
 		errBody := models.Error{}
 		err = xml.NewDecoder(bytes.NewBuffer(out)).Decode(&errBody)
 		if err != nil {
@@ -163,6 +157,7 @@ func SubmitReport(ctx context.Context, url string, headers *RequestHeaders, priv
 		return submitReport(ctx, client, url, headers, privateKey, report)
 	}
 	submitter = wrapReportSubmitterMiddleware(submitter, mw...)
+
 	return submitReport(ctx, client, url, headers, privateKey, report)
 }
 
@@ -265,7 +260,8 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 // ReportPayloadBytes returns the bytes of the report payload. It calls xml.Marshal on the report.
 // then replace all the occurrences of <PAYMENT>, </PAYMENT>, <VATTOTAL>, </VATTOTAL> with empty string ""
 // and then add the xml.Header to the beginning of the payload.
-func ReportPayloadBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address, vats []VatTotal, payments []Payment,
+func ReportPayloadBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address,
+	vats []VatTotal, payments []Payment,
 	totals ReportTotals,
 ) ([]byte, error) {
 	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}

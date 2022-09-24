@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 )
 
@@ -110,13 +109,7 @@ func fetchToken(ctx context.Context, client *http.Client, path string, request *
 	if err != nil {
 		return nil, fmt.Errorf("client call error: %w: %v", ErrFetchToken, err)
 	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "token error: could not close response body %v", err)
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	out, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -141,6 +134,7 @@ func fetchToken(ctx context.Context, client *http.Client, path string, request *
 }
 
 func (tr *TokenResponse) String() string {
-	return fmt.Sprintf("FetchToken Response: [Code=%s,Message=%s,AccessToken=%s,TokenType=%s,ExpiresIn=%d seconds,Error=%s]",
+	return fmt.Sprintf(
+		"FetchToken Response: [Code=%s,Message=%s,AccessToken=%s,TokenType=%s,ExpiresIn=%d seconds,Error=%s]",
 		tr.Code, tr.Message, tr.AccessToken, tr.TokenType, tr.ExpiresIn, tr.Error)
 }
