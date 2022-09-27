@@ -23,8 +23,6 @@ const (
 	SubmitReceiptAction        Action      = "receipt"
 	SubmitReportAction         Action      = "report"
 	ReceiptVerificationAction  Action      = "verification"
-	StandardVATRATEID                      = "A"
-	StandardVATRATE                        = 18
 	CashPaymentType            PaymentType = "CASH"
 	CreditCardPaymentType      PaymentType = "CCARD"
 	ChequePaymentType          PaymentType = "CHEQUE"
