@@ -308,8 +308,9 @@ func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, custo
 	return []byte(report), nil
 }
 
-// ReceiptLink creates a link to the receipt
-func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime string) string {
+// ReceiptLink creates a link to the receipt it accepts RECEIPTCODE, GC and the RECEIPTTIME
+// and base.Env to know if the receipt was created during testing or production.
+func ReceiptLink(e base.Env, receiptCode string, gc int64, receiptTime string) string {
 	var baseURL string
 
 	if e == base.ProdEnv {
@@ -317,13 +318,14 @@ func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime 
 	} else {
 		baseURL = VerifyReceiptTestingURL
 	}
-	return receiptLink(baseURL, receiptVerificationNumber, receiptVerificationTime)
+	return receiptLink(baseURL, receiptCode, gc, receiptTime)
 }
 
-func receiptLink(baseURL string, receiptVerificationNumber, receiptVerificationTime string) string {
+func receiptLink(baseURL string, receiptCode string, gc int64, receiptTime string) string {
 	return fmt.Sprintf(
-		"%s%s_%s",
+		"%s%s%d_%s",
 		baseURL,
-		receiptVerificationNumber,
-		strings.ReplaceAll(receiptVerificationTime, ":", ""))
+		receiptCode,
+		gc,
+		strings.ReplaceAll(receiptTime, ":", ""))
 }
