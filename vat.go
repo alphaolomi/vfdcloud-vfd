@@ -5,27 +5,22 @@ import (
 	"math"
 )
 
-// 1=Standard (A-18)
-// 2=Special rate(B-10)
-// 3=Zero Rated (C-0)
-// 4=Special Relief(D-SR)
-// 5=Exempted(E-EX)
 const (
 	StandardVATID        = "A"
 	StandardVATRATE      = 18.00
-	StandardVATCode      = 1
+	StandardVATCODE      = 1
 	SpecialVATID         = "B"
 	SpecialVATRATE       = 10.00
-	SpecialVATCode       = 2
+	SpecialVATCODE       = 2
 	ZeroVATID            = "C"
 	ZeroVATRATE          = 0.00
-	ZeroVATCode          = 3
+	ZeroVATCODE          = 3
 	SpecialReliefVATID   = "D"
 	SpecialReliefVATRATE = 0.00
-	SpecialReliefVATCode = 4
+	SpecialReliefVATCODE = 4
 	ExemptedVATID        = "E"
 	ExemptedVATRATE      = 0.00
-	ExemptedVATCode      = 5
+	ExemptedVATCODE      = 5
 )
 
 type (
@@ -40,39 +35,39 @@ type (
 var (
 	standardVAT = VAT{
 		ID:         StandardVATID,
-		Code:       StandardVATCode,
+		Code:       StandardVATCODE,
 		Name:       "Standard VAT",
 		Percentage: StandardVATRATE,
 	}
 	specialVAT = VAT{
 		ID:         SpecialVATID,
-		Code:       SpecialVATCode,
+		Code:       SpecialVATCODE,
 		Name:       "Special VAT",
 		Percentage: SpecialVATRATE,
 	}
 	zeroVAT = VAT{
 		ID:         ZeroVATID,
-		Code:       ZeroVATCode,
+		Code:       ZeroVATCODE,
 		Name:       "Zero VAT",
 		Percentage: ZeroVATRATE,
 	}
 	specialReliefVAT = VAT{
 		ID:         SpecialReliefVATID,
-		Code:       SpecialReliefVATCode,
+		Code:       SpecialReliefVATCODE,
 		Name:       "Special Relief VAT",
 		Percentage: SpecialReliefVATRATE,
 	}
 	exemptedVAT = VAT{
 		ID:         ExemptedVATID,
-		Code:       ExemptedVATCode,
+		Code:       ExemptedVATCODE,
 		Name:       "Exempted VAT",
 		Percentage: ExemptedVATRATE,
 	}
 )
 
-// Amount returns the amount deducted from the price of the product
+// amount returns the amount deducted from the price of the product
 // of a certain VAT category. Answer is rounded to 2 decimal places.
-func (v *VAT) Amount(price float64) float64 {
+func (v *VAT) amount(price float64) float64 {
 	return math.Floor((price*v.Percentage/100)*100) / 100
 }
 
@@ -110,19 +105,22 @@ func ParseVATID(id string) VAT {
 	}
 }
 
-// ReportVATRATE ...
-func ReportVATRATEFromCode(vatCode int64) string {
+func TaxAmount(vatCode int64, price float64) float64 {
+	vat := ParseVATCode(vatCode)
+	return vat.amount(price)
+}
+
+func TaxAmountFromID(vatID string, price float64) float64 {
+	vat := ParseVATID(vatID)
+	return vat.amount(price)
+}
+
+func ReportVATRATE(vatCode int64) string {
 	vat := ParseVATCode(vatCode)
 	return fmt.Sprintf("%s-%.2f", vat.ID, vat.Percentage)
 }
 
-// ReportVATRATE ...
 func ReportVATRATEFromID(vatID string) string {
 	vat := ParseVATID(vatID)
 	return fmt.Sprintf("%s-%.2f", vat.ID, vat.Percentage)
-}
-
-func TaxAmount(vatCode int64, price float64) float64 {
-	vat := ParseVATCode(vatCode)
-	return vat.Amount(price)
 }
