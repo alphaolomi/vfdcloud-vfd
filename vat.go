@@ -24,54 +24,54 @@ const (
 )
 
 type (
-	VAT struct {
-		ID         string // ID is a character that identifies the VAT it can be A,B,C,D or E
-		Code       int64  // Code is a number that identifies the VAT it can be 0,1,2,3 or 4
+	vat struct {
+		ID         string // ID is a character that identifies the vat it can be A,B,C,D or E
+		Code       int64  // Code is a number that identifies the vat it can be 0,1,2,3 or 4
 		Name       string
 		Percentage float64
 	}
 )
 
 var (
-	standardVAT = VAT{
+	standardVAT = vat{
 		ID:         StandardVATID,
 		Code:       StandardVATCODE,
-		Name:       "Standard VAT",
+		Name:       "Standard vat",
 		Percentage: StandardVATRATE,
 	}
-	specialVAT = VAT{
+	specialVAT = vat{
 		ID:         SpecialVATID,
 		Code:       SpecialVATCODE,
-		Name:       "Special VAT",
+		Name:       "Special vat",
 		Percentage: SpecialVATRATE,
 	}
-	zeroVAT = VAT{
+	zeroVAT = vat{
 		ID:         ZeroVATID,
 		Code:       ZeroVATCODE,
-		Name:       "Zero VAT",
+		Name:       "Zero vat",
 		Percentage: ZeroVATRATE,
 	}
-	specialReliefVAT = VAT{
+	specialReliefVAT = vat{
 		ID:         SpecialReliefVATID,
 		Code:       SpecialReliefVATCODE,
-		Name:       "Special Relief VAT",
+		Name:       "Special Relief vat",
 		Percentage: SpecialReliefVATRATE,
 	}
-	exemptedVAT = VAT{
+	exemptedVAT = vat{
 		ID:         ExemptedVATID,
 		Code:       ExemptedVATCODE,
-		Name:       "Exempted VAT",
+		Name:       "Exempted vat",
 		Percentage: ExemptedVATRATE,
 	}
 )
 
 // amount returns the amount deducted from the price of the product
-// of a certain VAT category. Answer is rounded to 2 decimal places.
-func (v *VAT) amount(price float64) float64 {
+// of a certain vat category. Answer is rounded to 2 decimal places.
+func (v *vat) amount(price float64) float64 {
 	return math.Floor((price*v.Percentage/100)*100) / 100
 }
 
-func ParseVATCode(code int64) VAT {
+func parseTaxCode(code int64) vat {
 	switch code {
 	case 1:
 		return standardVAT
@@ -88,39 +88,31 @@ func ParseVATCode(code int64) VAT {
 	}
 }
 
-func ParseVATID(id string) VAT {
-	switch id {
-	case "A":
-		return standardVAT
-	case "B":
-		return specialVAT
-	case "C":
-		return zeroVAT
-	case "D":
-		return specialReliefVAT
-	case "E":
-		return exemptedVAT
-	default:
-		return standardVAT
-	}
+// ValueAddedTaxRate returns the vat rate of a certain vat category
+func ValueAddedTaxRate(taxCode int64) float64 {
+	vat := parseTaxCode(taxCode)
+	return vat.Percentage
 }
 
-func TaxAmount(vatCode int64, price float64) float64 {
-	vat := ParseVATCode(vatCode)
+// ValueAddedTaxID returns the vat id of a certain vat category
+// It returns "A" for standard vat, "B" for special vat,
+// "C" for zero vat,"D" for special relief and "E" for
+// exempted vat.
+func ValueAddedTaxID(taxCode int64) string {
+	vat := parseTaxCode(taxCode)
+	return vat.ID
+}
+
+func TaxAmount(taxCode int64, price float64) float64 {
+	vat := parseTaxCode(taxCode)
 	return vat.amount(price)
 }
 
-func TaxAmountFromID(vatID string, price float64) float64 {
-	vat := ParseVATID(vatID)
-	return vat.amount(price)
-}
-
-func ReportVATRATE(vatCode int64) string {
-	vat := ParseVATCode(vatCode)
-	return fmt.Sprintf("%s-%.2f", vat.ID, vat.Percentage)
-}
-
-func ReportVATRATEFromID(vatID string) string {
-	vat := ParseVATID(vatID)
+// ReportTaxRateID creates a string that contains the vat rate and the vat id
+// of a certain vat category. It returns "A-18.00" for standard vat,
+// "B-10.00" for special vat, "C-0.00" for zero vat and so on. The ID is then
+// used in Z Report to indicate the vat rate and the vat id.
+func ReportTaxRateID(taxCode int64) string {
+	vat := parseTaxCode(taxCode)
 	return fmt.Sprintf("%s-%.2f", vat.ID, vat.Percentage)
 }
