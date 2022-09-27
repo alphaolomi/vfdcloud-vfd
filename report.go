@@ -48,7 +48,6 @@ type (
 		ZNumber          string
 		EFDSerial        string
 		RegistrationDate string
-		User             string
 	}
 
 	ReportRequest struct {
@@ -230,7 +229,7 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 		ZNUMBER:          params.ZNumber,
 		EFDSERIAL:        params.EFDSerial,
 		REGISTRATIONDATE: params.RegistrationDate,
-		USER:             params.User,
+		USER:             "",
 		SIMIMSI:          SIMIMSI,
 		TOTALS:           TT,
 		VATTOTALS: models.VATTOTALS{
