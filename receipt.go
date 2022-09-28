@@ -120,9 +120,8 @@ func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmit
 	return uploader
 }
 
-func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *ReceiptRequest,
-) (*Response, error) {
+func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,
+	privateKey *rsa.PrivateKey, rct *ReceiptRequest) (*Response, error) {
 	var (
 		contentType = headers.ContentType
 		routingKey  = headers.RoutingKey
@@ -139,7 +138,8 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
 
-	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL, bytes.NewBuffer(payload))
+	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL,
+		bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}
