@@ -33,6 +33,10 @@ const (
 	NIDACustomerID             CustomerID  = 5
 	NonCustomerID              CustomerID  = 6
 	MeterNumberCustomerID      CustomerID  = 7
+	SubmitReceiptRoutingKey    string      = "vfdrct"
+	SubmitReportRoutingKey     string      = "vfdzreport"
+	ContentTypeXML             string      = "application/xml"
+	RegistrationRequestClient  string      = "webapi"
 )
 
 type (
@@ -62,10 +66,8 @@ type (
 	// RequestHeaders represent collection of request headers during receipt or Z report
 	// sending via VFD Service.
 	RequestHeaders struct {
-		ContentType string
 		CertSerial  string
 		BearerToken string
-		RoutingKey  string
 	}
 
 	Payment struct {
@@ -73,10 +75,10 @@ type (
 		Amount float64
 	}
 
-	// VatTotal contains information about how much vat rate was used
+	// VATTOTAL contains information about how much vat rate was used
 	// Standard vat rate is 18%
-	// e.g VatTotal{ID:"A",Rate: 18, Amount: 1000}.
-	VatTotal struct {
+	// e.g VATTOTAL{ID:"A",Rate: 18, Amount: 1000}.
+	VATTOTAL struct {
 		ID     string
 		Rate   float64
 		Amount float64

@@ -53,7 +53,6 @@ type (
 	RegistrationRequest struct {
 		ContentType string
 		CertSerial  string
-		Client      string
 		Tin         string
 		CertKey     string
 	}
@@ -133,9 +132,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 	var (
 		taxIdNumber = request.Tin
 		certKey     = request.CertKey
-		apiClient   = request.Client
 		certSerial  = EncodeBase64String(request.CertSerial)
-		contentType = request.ContentType
 	)
 
 	reg := models.REGDATA{
@@ -164,13 +161,13 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(out))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestURL, bytes.NewBuffer(out))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("Content-Type", ContentTypeXML)
 	req.Header.Set("Cert-Serial", certSerial)
-	req.Header.Set("Client", apiClient)
+	req.Header.Set("Client", RegistrationRequestClient)
 
 	resp, err := client.Do(req)
 	if err != nil {

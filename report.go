@@ -54,7 +54,7 @@ type (
 		Params  *ReportParams
 		Address *Address
 		Totals  *ReportTotals
-		VATS    []VatTotal
+		VATS    []VATTOTAL
 		Payment []Payment
 	}
 
@@ -84,8 +84,6 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 	report *ReportRequest,
 ) (*Response, error) {
 	var (
-		contentType = headers.ContentType
-		routingKey  = headers.RoutingKey
 		certSerial  = headers.CertSerial
 		bearerToken = headers.BearerToken
 	)
@@ -105,8 +103,8 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("Routing-Key", routingKey)
+	req.Header.Set("Content-Type", ContentTypeXML)
+	req.Header.Set("Routing-Key", SubmitReportRoutingKey)
 	req.Header.Set("Cert-Serial", EncodeBase64String(certSerial))
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
 
@@ -169,7 +167,7 @@ func (lines *Address) AsList() []string {
 	}
 }
 
-func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, payments []Payment, totals ReportTotals) *models.ZREPORT {
+func GenerateZReport(params *ReportParams, address Address, vats []VATTOTAL, payments []Payment, totals ReportTotals) *models.ZREPORT {
 	const (
 		SIMIMSI       = "WEBAPI"
 		FWVERSION     = "3.0"
@@ -260,7 +258,7 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 // then replace all the occurrences of <PAYMENT>, </PAYMENT>, <VATTOTAL>, </VATTOTAL> with empty string ""
 // and then add the xml.Header to the beginning of the payload.
 func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address,
-	vats []VatTotal, payments []Payment,
+	vats []VATTOTAL, payments []Payment,
 	totals ReportTotals,
 ) ([]byte, error) {
 	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}

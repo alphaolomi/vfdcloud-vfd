@@ -105,8 +105,6 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 	privateKey *rsa.PrivateKey, rct *ReceiptRequest,
 ) (*Response, error) {
 	var (
-		contentType = headers.ContentType
-		routingKey  = headers.RoutingKey
 		certSerial  = headers.CertSerial
 		bearerToken = headers.BearerToken
 	)
@@ -126,8 +124,8 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("Routing-Key", routingKey)
+	req.Header.Set("Content-Type", ContentTypeXML)
+	req.Header.Set("Routing-Key", SubmitReceiptRoutingKey)
 	req.Header.Set("Cert-Serial", EncodeBase64String(certSerial))
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
 
