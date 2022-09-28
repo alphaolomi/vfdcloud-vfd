@@ -282,7 +282,8 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 	return rct
 }
 
-func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer, items []Item, payments []Payment) ([]byte, error) {
+func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer,
+	items []Item, payments []Payment) ([]byte, error) {
 	receipt := GenerateReceipt(params, customer, items, payments)
 	receiptBytes, err := xml.Marshal(receipt)
 	if err != nil {
