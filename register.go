@@ -64,7 +64,7 @@ type (
 	RegistrationMiddleware func(next Registrar) Registrar
 )
 
-func responseFormat(response *models.RegistrationResponse) *RegistrationResponse {
+func responseFormat(response *models.REGDATARESP) *RegistrationResponse {
 	return &RegistrationResponse{
 		ACKCODE:     response.ACKCODE,
 		ACKMSG:      response.ACKMSG,
@@ -138,7 +138,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		contentType = request.ContentType
 	)
 
-	reg := models.RegistrationBody{
+	reg := models.REGDATA{
 		TIN:     taxIdNumber,
 		CERTKEY: certKey,
 	}
@@ -154,8 +154,8 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 	}
 
 	signedPayloadBase64 := EncodeBase64Bytes(signedPayload)
-	requestPayload := models.RegistrationRequest{
-		Reg:            reg,
+	requestPayload := models.REGDATAEFDMS{
+		REGDATA:        reg,
 		EFDMSSIGNATURE: signedPayloadBase64,
 	}
 
@@ -199,7 +199,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		return nil, fmt.Errorf("%w: %s", ErrRegistrationFailed, errBody.Message)
 	}
 
-	responseBody := models.RegistrationAck{}
+	responseBody := models.REGRESPACK{}
 	err = xml.NewDecoder(bytes.NewBuffer(out)).Decode(&responseBody)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", ErrRegistrationFailed, err)
