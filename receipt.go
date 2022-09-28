@@ -79,9 +79,9 @@ func VerifyUploadReceiptRequest() ReceiptSubmitMiddleware {
 			receipt *ReceiptRequest,
 		) (*Response, error) {
 			// Steps:
-			//TODO 1. Verify the request headers
-			//TODO 2. verify request URL
-			//TODO 3. Verify the receipt
+			// TODO 1. Verify the request headers
+			// TODO 2. verify request URL
+			// TODO 3. Verify the receipt
 			return next(ctx, url, headers, privateKey, receipt)
 		}
 
@@ -121,7 +121,8 @@ func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmit
 }
 
 func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,
-	privateKey *rsa.PrivateKey, rct *ReceiptRequest) (*Response, error) {
+	privateKey *rsa.PrivateKey, rct *ReceiptRequest,
+) (*Response, error) {
 	var (
 		contentType = headers.ContentType
 		routingKey  = headers.RoutingKey
@@ -283,7 +284,8 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 }
 
 func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer,
-	items []Item, payments []Payment) ([]byte, error) {
+	items []Item, payments []Payment,
+) ([]byte, error) {
 	receipt := GenerateReceipt(params, customer, items, payments)
 	receiptBytes, err := xml.Marshal(receipt)
 	if err != nil {
