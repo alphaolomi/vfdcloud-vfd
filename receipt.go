@@ -73,24 +73,6 @@ type (
 	ReceiptSubmitMiddleware func(next ReceiptSubmitter) ReceiptSubmitter
 )
 
-func VerifyUploadReceiptRequest() ReceiptSubmitMiddleware {
-	m := func(next ReceiptSubmitter) ReceiptSubmitter {
-		u := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-			receipt *ReceiptRequest,
-		) (*Response, error) {
-			// Steps:
-			// TODO 1. Verify the request headers
-			// TODO 2. verify request URL
-			// TODO 3. Verify the receipt
-			return next(ctx, url, headers, privateKey, receipt)
-		}
-
-		return u
-	}
-
-	return m
-}
-
 // SubmitReceipt uploads a receipt to the VFD server.
 func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	rct *ReceiptRequest, mw ...ReceiptSubmitMiddleware,
@@ -101,7 +83,6 @@ func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeade
 	) (*Response, error) {
 		return submitReceipt(ctx, client, url, headers, privateKey, receipt)
 	}
-	uploader = wrapReceiptSubmitMiddlewares(uploader, VerifyUploadReceiptRequest())
 	uploader = wrapReceiptSubmitMiddlewares(uploader, mw...)
 	return uploader(ctx, requestURL, headers, privateKey, rct)
 }
