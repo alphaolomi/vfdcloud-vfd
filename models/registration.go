@@ -37,10 +37,10 @@ type RegistrationResponse struct {
 	USERNAME    string   `xml:"USERNAME"`
 	PASSWORD    string   `xml:"PASSWORD"`
 	TOKENPATH   string   `xml:"TOKENPATH"`
-	TAXCODES    TaxCodes `xml:"TAXCODES"`
+	TAXCODES    TAXCODES `xml:"TAXCODES"`
 }
 
-type TaxCodes struct {
+type TAXCODES struct {
 	XMLName xml.Name `xml:"TAXCODES"`
 	Text    string   `xml:",chardata"`
 	CODEA   string   `xml:"CODEA"`

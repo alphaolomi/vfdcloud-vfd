@@ -132,7 +132,7 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 	newContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	payload, err := ReceiptPayloadBytes(
+	payload, err := ReceiptBytes(
 		privateKey, rct.Params, rct.Customer, rct.Items, rct.Payments)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
@@ -282,7 +282,7 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 	return rct
 }
 
-func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer,
+func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer,
 	items []Item, payments []Payment) ([]byte, error) {
 	receipt := GenerateReceipt(params, customer, items, payments)
 	receiptBytes, err := xml.Marshal(receipt)
