@@ -3,8 +3,6 @@ package vfd
 import (
 	"context"
 	"crypto/rsa"
-
-	"github.com/vfdcloud/vfd/models"
 )
 
 var _ Service = (*mock)(nil)
@@ -12,7 +10,7 @@ var _ Service = (*mock)(nil)
 type mock struct{}
 
 func (m *mock) Register(ctx context.Context, url string, key *rsa.PrivateKey, request *RegistrationRequest) (
-	*models.RegistrationResponse, error,
+	*RegistrationResponse, error,
 ) {
 	return Register(ctx, url, key, request, nil)
 }

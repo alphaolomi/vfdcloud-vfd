@@ -3,8 +3,6 @@ package vfd
 import (
 	"context"
 	"crypto/rsa"
-
-	"github.com/vfdcloud/vfd/models"
 )
 
 const (
@@ -110,7 +108,7 @@ type (
 		// yield the same response.VFD should store the registration response to
 		// avoid calling Register again.
 		Register(ctx context.Context, url string, privateKey *rsa.PrivateKey, request *RegistrationRequest,
-		) (*models.RegistrationResponse, error)
+		) (*RegistrationResponse, error)
 
 		// FetchToken is used to fetch a token from the VFD Service. The token is used
 		// to authenticate the VFD when submitting receipts and Z reports.

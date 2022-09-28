@@ -73,24 +73,6 @@ type (
 	ReceiptSubmitMiddleware func(next ReceiptSubmitter) ReceiptSubmitter
 )
 
-func VerifyUploadReceiptRequest() ReceiptSubmitMiddleware {
-	m := func(next ReceiptSubmitter) ReceiptSubmitter {
-		u := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-			receipt *ReceiptRequest,
-		) (*Response, error) {
-			// Steps:
-			//TODO 1. Verify the request headers
-			//TODO 2. verify request URL
-			//TODO 3. Verify the receipt
-			return next(ctx, url, headers, privateKey, receipt)
-		}
-
-		return u
-	}
-
-	return m
-}
-
 // SubmitReceipt uploads a receipt to the VFD server.
 func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	rct *ReceiptRequest, mw ...ReceiptSubmitMiddleware,
@@ -101,7 +83,6 @@ func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeade
 	) (*Response, error) {
 		return submitReceipt(ctx, client, url, headers, privateKey, receipt)
 	}
-	uploader = wrapReceiptSubmitMiddlewares(uploader, VerifyUploadReceiptRequest())
 	uploader = wrapReceiptSubmitMiddlewares(uploader, mw...)
 	return uploader(ctx, requestURL, headers, privateKey, rct)
 }
@@ -120,8 +101,8 @@ func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmit
 	return uploader
 }
 
-func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *ReceiptRequest,
+func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,
+	privateKey *rsa.PrivateKey, rct *ReceiptRequest,
 ) (*Response, error) {
 	var (
 		contentType = headers.ContentType
@@ -133,13 +114,14 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 	newContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	payload, err := ReceiptPayloadBytes(
+	payload, err := ReceiptBytes(
 		privateKey, rct.Params, rct.Customer, rct.Items, rct.Payments)
 	if err != nil {
 		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 	}
 
-	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL, bytes.NewBuffer(payload))
+	req, err := http.NewRequestWithContext(newContext, http.MethodPost, requestURL,
+		bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, err
 	}
@@ -282,7 +264,9 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 	return rct
 }
 
-func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer, items []Item, payments []Payment) ([]byte, error) {
+func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer,
+	items []Item, payments []Payment,
+) ([]byte, error) {
 	receipt := GenerateReceipt(params, customer, items, payments)
 	receiptBytes, err := xml.Marshal(receipt)
 	if err != nil {
@@ -308,8 +292,9 @@ func ReceiptPayloadBytes(privateKey *rsa.PrivateKey, params ReceiptParams, custo
 	return []byte(report), nil
 }
 
-// ReceiptLink creates a link to the receipt
-func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime string) string {
+// ReceiptLink creates a link to the receipt it accepts RECEIPTCODE, GC and the RECEIPTTIME
+// and base.Env to know if the receipt was created during testing or production.
+func ReceiptLink(e base.Env, receiptCode string, gc int64, receiptTime string) string {
 	var baseURL string
 
 	if e == base.ProdEnv {
@@ -317,13 +302,14 @@ func ReceiptLink(e base.Env, receiptVerificationNumber, receiptVerificationTime 
 	} else {
 		baseURL = VerifyReceiptTestingURL
 	}
-	return receiptLink(baseURL, receiptVerificationNumber, receiptVerificationTime)
+	return receiptLink(baseURL, receiptCode, gc, receiptTime)
 }
 
-func receiptLink(baseURL string, receiptVerificationNumber, receiptVerificationTime string) string {
+func receiptLink(baseURL string, receiptCode string, gc int64, receiptTime string) string {
 	return fmt.Sprintf(
-		"%s%s_%s",
+		"%s%s%d_%s",
 		baseURL,
-		receiptVerificationNumber,
-		strings.ReplaceAll(receiptVerificationTime, ":", ""))
+		receiptCode,
+		gc,
+		strings.ReplaceAll(receiptTime, ":", ""))
 }

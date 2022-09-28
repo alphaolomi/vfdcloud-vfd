@@ -3,17 +3,17 @@ package models
 import "encoding/xml"
 
 type (
-	RegistrationAck struct {
-		XMLName        xml.Name             `xml:"EFDMS"`
-		Text           string               `xml:",chardata"`
-		EFDMSRESP      RegistrationResponse `xml:"EFDMSRESP"`
-		EFDMSSIGNATURE string               `xml:"EFDMSSIGNATURE"`
+	REGRESPACK struct {
+		XMLName        xml.Name    `xml:"EFDMS"`
+		Text           string      `xml:",chardata"`
+		EFDMSRESP      REGDATARESP `xml:"EFDMSRESP"`
+		EFDMSSIGNATURE string      `xml:"EFDMSSIGNATURE"`
 	}
 )
 
-// RegistrationResponse is the response message received from the VFD
+// REGDATARESP is the response message received from the VFD
 // after a successful registration.
-type RegistrationResponse struct {
+type REGDATARESP struct {
 	XMLName     xml.Name `xml:"EFDMSRESP"`
 	Text        string   `xml:",chardata"`
 	ACKCODE     string   `xml:"ACKCODE"`
@@ -37,10 +37,10 @@ type RegistrationResponse struct {
 	USERNAME    string   `xml:"USERNAME"`
 	PASSWORD    string   `xml:"PASSWORD"`
 	TOKENPATH   string   `xml:"TOKENPATH"`
-	TAXCODES    TaxCodes `xml:"TAXCODES"`
+	TAXCODES    TAXCODES `xml:"TAXCODES"`
 }
 
-type TaxCodes struct {
+type TAXCODES struct {
 	XMLName xml.Name `xml:"TAXCODES"`
 	Text    string   `xml:",chardata"`
 	CODEA   string   `xml:"CODEA"`
@@ -49,14 +49,14 @@ type TaxCodes struct {
 	CODED   string   `xml:"CODED"`
 }
 
-type RegistrationRequest struct {
-	XMLName        xml.Name         `xml:"EFDMS"`
-	Text           string           `xml:",chardata"`
-	Reg            RegistrationBody `xml:"REGDATA"`
-	EFDMSSIGNATURE string           `xml:"EFDMSSIGNATURE"`
+type REGDATAEFDMS struct {
+	XMLName        xml.Name `xml:"EFDMS"`
+	Text           string   `xml:",chardata"`
+	REGDATA        REGDATA  `xml:"REGDATA"`
+	EFDMSSIGNATURE string   `xml:"EFDMSSIGNATURE"`
 }
 
-type RegistrationBody struct {
+type REGDATA struct {
 	XMLName xml.Name `xml:"REGDATA"`
 	Text    string   `xml:",chardata"`
 	TIN     string   `xml:"TIN"`

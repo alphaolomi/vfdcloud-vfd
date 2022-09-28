@@ -93,7 +93,7 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 	newContext, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	payload, err := ReportPayloadBytes(
+	payload, err := ReportBytes(
 		privateKey, report.Params, *report.Address, report.VATS,
 		report.Payment, *report.Totals)
 	if err != nil {
@@ -256,10 +256,10 @@ func GenerateZReport(params *ReportParams, address Address, vats []VatTotal, pay
 	return report
 }
 
-// ReportPayloadBytes returns the bytes of the report payload. It calls xml.Marshal on the report.
+// ReportBytes returns the bytes of the report payload. It calls xml.Marshal on the report.
 // then replace all the occurrences of <PAYMENT>, </PAYMENT>, <VATTOTAL>, </VATTOTAL> with empty string ""
 // and then add the xml.Header to the beginning of the payload.
-func ReportPayloadBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address,
+func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address,
 	vats []VatTotal, payments []Payment,
 	totals ReportTotals,
 ) ([]byte, error) {

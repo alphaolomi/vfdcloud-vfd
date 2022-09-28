@@ -17,6 +17,39 @@ import (
 var ErrRegistrationFailed = errors.New("registration failed")
 
 type (
+	RegistrationResponse struct {
+		ACKCODE     string   `xml:"ACKCODE"`
+		ACKMSG      string   `xml:"ACKMSG"`
+		REGID       string   `xml:"REGID"`
+		SERIAL      string   `xml:"SERIAL"`
+		UIN         string   `xml:"UIN"`
+		TIN         string   `xml:"TIN"`
+		VRN         string   `xml:"VRN"`
+		MOBILE      string   `xml:"MOBILE"`
+		ADDRESS     string   `xml:"ADDRESS"`
+		STREET      string   `xml:"STREET"`
+		CITY        string   `xml:"CITY"`
+		COUNTRY     string   `xml:"COUNTRY"`
+		NAME        string   `xml:"NAME"`
+		RECEIPTCODE string   `xml:"RECEIPTCODE"`
+		REGION      string   `xml:"REGION"`
+		ROUTINGKEY  string   `xml:"ROUTINGKEY"`
+		GC          int64    `xml:"GC"`
+		TAXOFFICE   string   `xml:"TAXOFFICE"`
+		USERNAME    string   `xml:"USERNAME"`
+		PASSWORD    string   `xml:"PASSWORD"`
+		TOKENPATH   string   `xml:"TOKENPATH"`
+		TAXCODES    TAXCODES `xml:"TAXCODES"`
+	}
+
+	TAXCODES struct {
+		XMLName xml.Name `xml:"TAXCODES"`
+		Text    string   `xml:",chardata"`
+		CODEA   string   `xml:"CODEA"`
+		CODEB   string   `xml:"CODEB"`
+		CODEC   string   `xml:"CODEC"`
+		CODED   string   `xml:"CODED"`
+	}
 	RegistrationRequest struct {
 		ContentType string
 		CertSerial  string
@@ -26,10 +59,42 @@ type (
 	}
 
 	Registrar func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
-		request *RegistrationRequest) (*models.RegistrationResponse, error)
+		request *RegistrationRequest) (*RegistrationResponse, error)
 
 	RegistrationMiddleware func(next Registrar) Registrar
 )
+
+func responseFormat(response *models.REGDATARESP) *RegistrationResponse {
+	return &RegistrationResponse{
+		ACKCODE:     response.ACKCODE,
+		ACKMSG:      response.ACKMSG,
+		REGID:       response.REGID,
+		SERIAL:      response.SERIAL,
+		UIN:         response.UIN,
+		TIN:         response.TIN,
+		VRN:         response.VRN,
+		MOBILE:      response.MOBILE,
+		ADDRESS:     response.ADDRESS,
+		STREET:      response.STREET,
+		CITY:        response.CITY,
+		COUNTRY:     response.COUNTRY,
+		NAME:        response.NAME,
+		RECEIPTCODE: response.RECEIPTCODE,
+		REGION:      response.REGION,
+		ROUTINGKEY:  response.ROUTINGKEY,
+		GC:          response.GC,
+		TAXOFFICE:   response.TAXOFFICE,
+		USERNAME:    response.USERNAME,
+		PASSWORD:    response.PASSWORD,
+		TOKENPATH:   response.TOKENPATH,
+		TAXCODES: TAXCODES{
+			CODEA: response.TAXCODES.CODEA,
+			CODEB: response.TAXCODES.CODEB,
+			CODEC: response.TAXCODES.CODEC,
+			CODED: response.TAXCODES.CODED,
+		},
+	}
+}
 
 func wrapRegistrationMiddleware(registrar Registrar, mw ...RegistrationMiddleware) Registrar {
 	// Loop backwards through the middleware invoking each one. Replace the
@@ -49,10 +114,10 @@ func wrapRegistrationMiddleware(registrar Registrar, mw ...RegistrationMiddlewar
 // authenticate the client.
 func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey,
 	request *RegistrationRequest, mw []RegistrationMiddleware,
-) (*models.RegistrationResponse, error) {
+) (*RegistrationResponse, error) {
 	registrar := func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
 		request *RegistrationRequest,
-	) (*models.RegistrationResponse, error) {
+	) (*RegistrationResponse, error) {
 		client := getHttpClientInstance().client
 		return register(ctx, client, url, privateKey, request)
 	}
@@ -64,7 +129,7 @@ func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey
 
 func register(ctx context.Context, client *http.Client, requestURL string, privateKey *rsa.PrivateKey,
 	request *RegistrationRequest,
-) (*models.RegistrationResponse, error) {
+) (*RegistrationResponse, error) {
 	var (
 		taxIdNumber = request.Tin
 		certKey     = request.CertKey
@@ -73,7 +138,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		contentType = request.ContentType
 	)
 
-	reg := models.RegistrationBody{
+	reg := models.REGDATA{
 		TIN:     taxIdNumber,
 		CERTKEY: certKey,
 	}
@@ -89,8 +154,8 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 	}
 
 	signedPayloadBase64 := EncodeBase64Bytes(signedPayload)
-	requestPayload := models.RegistrationRequest{
-		Reg:            reg,
+	requestPayload := models.REGDATAEFDMS{
+		REGDATA:        reg,
 		EFDMSSIGNATURE: signedPayloadBase64,
 	}
 
@@ -134,7 +199,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		return nil, fmt.Errorf("%w: %s", ErrRegistrationFailed, errBody.Message)
 	}
 
-	responseBody := models.RegistrationAck{}
+	responseBody := models.REGRESPACK{}
 	err = xml.NewDecoder(bytes.NewBuffer(out)).Decode(&responseBody)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", ErrRegistrationFailed, err)
@@ -149,5 +214,5 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		return nil, fmt.Errorf("%v response code: %s, message: %s", ErrRegistrationFailed, responseCode, responseMessage)
 	}
 
-	return response, nil
+	return responseFormat(response), nil
 }
