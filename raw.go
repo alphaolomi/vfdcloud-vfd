@@ -5,11 +5,12 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"github.com/vfdcloud/base"
-	"github.com/vfdcloud/vfd/models"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/vfdcloud/base"
+	"github.com/vfdcloud/vfd/models"
 )
 
 type (
