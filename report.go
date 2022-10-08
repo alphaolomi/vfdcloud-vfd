@@ -271,13 +271,6 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 	}
 	payloadString := replacer.Replace(string(payload))
 
-	signedPayload, err := SignPayload(privateKey, []byte(payloadString))
-	if err != nil {
-		return nil, fmt.Errorf("failed to sign the payload: %w", err)
-	}
-	base64PayloadSignature := base64.StdEncoding.EncodeToString(signedPayload)
-	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", payloadString, base64PayloadSignature)
-	report = fmt.Sprintf("%s%s", xml.Header, report)
 	dailyAmountTag := fmt.Sprintf("<DAILYTOTALAMOUNT>%.2f</DAILYTOTALAMOUNT>", totals.DailyTotalAmount)
 	grossAmountTag := fmt.Sprintf("<GROSS>%.2f</GROSS>", totals.Gross)
 	netAmountTag := fmt.Sprintf("<NETTAMOUNT>%.2f</NETTAMOUNT>", vats[0].Amount)
@@ -289,11 +282,19 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 	regexNetAmount := regexp.MustCompile(`<NETTAMOUNT>.*</NETTAMOUNT>`)
 	regexTaxAmount := regexp.MustCompile(`<TAXAMOUNT>.*</TAXAMOUNT>`)
 	// replace all the occurrences of the regex with the correct value
-	report = regexDailyAmount.ReplaceAllString(report, dailyAmountTag)
-	report = regexGrossAmount.ReplaceAllString(report, grossAmountTag)
-	report = regexPmtAmount.ReplaceAllString(report, pmtAmountTag)
-	report = regexNetAmount.ReplaceAllString(report, netAmountTag)
-	report = regexTaxAmount.ReplaceAllString(report, taxAmountTag)
+	payloadString = regexDailyAmount.ReplaceAllString(payloadString, dailyAmountTag)
+	payloadString = regexGrossAmount.ReplaceAllString(payloadString, grossAmountTag)
+	payloadString = regexPmtAmount.ReplaceAllString(payloadString, pmtAmountTag)
+	payloadString = regexNetAmount.ReplaceAllString(payloadString, netAmountTag)
+	payloadString = regexTaxAmount.ReplaceAllString(payloadString, taxAmountTag)
+
+	signedPayload, err := SignPayload(privateKey, []byte(payloadString))
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign the payload: %w", err)
+	}
+	base64PayloadSignature := base64.StdEncoding.EncodeToString(signedPayload)
+	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", payloadString, base64PayloadSignature)
+	report = fmt.Sprintf("%s%s", xml.Header, report)
 
 	return []byte(report), nil
 }
