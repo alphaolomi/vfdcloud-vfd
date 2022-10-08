@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/vfdcloud/vfd/models"
@@ -277,6 +278,22 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 	base64PayloadSignature := base64.StdEncoding.EncodeToString(signedPayload)
 	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", payloadString, base64PayloadSignature)
 	report = fmt.Sprintf("%s%s", xml.Header, report)
+	dailyAmountTag := fmt.Sprintf("<DAILYTOTALAMOUNT>%.2f</DAILYTOTALAMOUNT>", totals.DailyTotalAmount)
+	grossAmountTag := fmt.Sprintf("<GROSS>%.2f</GROSS>", totals.Gross)
+	netAmountTag := fmt.Sprintf("<NETTAMOUNT>%.2f</NETTAMOUNT>", vats[0].Amount)
+	pmtAmountTag := fmt.Sprintf("<PMTAMOUNT>%.2f</PMTAMOUNT>", payments[0].Amount)
+	taxAmountTag := fmt.Sprintf("<TAXAMOUNT>%.2f</TAXAMOUNT>", vats[0].Amount)
+	regexDailyAmount := regexp.MustCompile(`<DAILYTOTALAMOUNT>.*</DAILYTOTALAMOUNT>`)
+	regexGrossAmount := regexp.MustCompile(`<GROSS>.*</GROSS>`)
+	regexPmtAmount := regexp.MustCompile(`<PMTAMOUNT>.*</PMTAMOUNT>`)
+	regexNetAmount := regexp.MustCompile(`<NETTAMOUNT>.*</NETTAMOUNT>`)
+	regexTaxAmount := regexp.MustCompile(`<TAXAMOUNT>.*</TAXAMOUNT>`)
+	// replace all the occurrences of the regex with the correct value
+	report = regexDailyAmount.ReplaceAllString(report, dailyAmountTag)
+	report = regexGrossAmount.ReplaceAllString(report, grossAmountTag)
+	report = regexPmtAmount.ReplaceAllString(report, pmtAmountTag)
+	report = regexNetAmount.ReplaceAllString(report, netAmountTag)
+	report = regexTaxAmount.ReplaceAllString(report, taxAmountTag)
 
 	return []byte(report), nil
 }
