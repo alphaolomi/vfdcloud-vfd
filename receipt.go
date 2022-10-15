@@ -65,40 +65,33 @@ type (
 		Items    []Item
 		Payments []Payment
 	}
-	// ReceiptSubmitter uploads receipts to the VFD server
-	ReceiptSubmitter func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-		receipt *ReceiptRequest) (*Response, error)
-
-	ReceiptSubmitMiddleware func(next ReceiptSubmitter) ReceiptSubmitter
+	//// ReceiptSubmitter uploads receipts to the VFD server
+	//ReceiptSubmitter func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
+	//	receipt *ReceiptRequest) (*Response, error)
+	//
+	//ReceiptSubmitMiddleware func(next ReceiptSubmitter) ReceiptSubmitter
 )
 
 // SubmitReceipt uploads a receipt to the VFD server.
 func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	rct *ReceiptRequest, mw ...ReceiptSubmitMiddleware,
-) (*Response, error) {
+	receiptRequest *ReceiptRequest) (*Response, error) {
 	client := getHttpClientInstance().client
-	uploader := func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-		receipt *ReceiptRequest,
-	) (*Response, error) {
-		return submitReceipt(ctx, client, url, headers, privateKey, receipt)
-	}
-	uploader = wrapReceiptSubmitMiddlewares(uploader, mw...)
-	return uploader(ctx, requestURL, headers, privateKey, rct)
+	return submitReceipt(ctx, client, requestURL, headers, privateKey, receiptRequest)
 }
 
-func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmitMiddleware) ReceiptSubmitter {
-	// Loop backwards through the middleware invoking each one. Replace the
-	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
-	// first middleware of the slice is the first to be executed by requests.
-	for i := len(mw) - 1; i >= 0; i-- {
-		u := mw[i]
-		if u != nil {
-			uploader = u(uploader)
-		}
-	}
-
-	return uploader
-}
+//func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmitMiddleware) ReceiptSubmitter {
+//	// Loop backwards through the middleware invoking each one. Replace the
+//	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
+//	// first middleware of the slice is the first to be executed by requests.
+//	for i := len(mw) - 1; i >= 0; i-- {
+//		u := mw[i]
+//		if u != nil {
+//			uploader = u(uploader)
+//		}
+//	}
+//
+//	return uploader
+//}
 
 func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,
 	privateKey *rsa.PrivateKey, rct *ReceiptRequest,

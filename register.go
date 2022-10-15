@@ -57,10 +57,10 @@ type (
 		CertKey     string
 	}
 
-	Registrar func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
-		request *RegistrationRequest) (*RegistrationResponse, error)
-
-	RegistrationMiddleware func(next Registrar) Registrar
+	//Registrar func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
+	//	request *RegistrationRequest) (*RegistrationResponse, error)
+	//
+	//RegistrationMiddleware func(next Registrar) Registrar
 )
 
 func responseFormat(response *models.REGDATARESP) *RegistrationResponse {
@@ -95,35 +95,26 @@ func responseFormat(response *models.REGDATARESP) *RegistrationResponse {
 	}
 }
 
-func wrapRegistrationMiddleware(registrar Registrar, mw ...RegistrationMiddleware) Registrar {
-	// Loop backwards through the middleware invoking each one. Replace the
-	// registrar with the new wrapped registrar. Looping backwards ensures that the
-	// first middleware of the slice is the first to be executed by requests.
-	for i := len(mw) - 1; i >= 0; i-- {
-		u := mw[i]
-		if u != nil {
-			registrar = u(registrar)
-		}
-	}
-	return registrar
-}
+//func wrapRegistrationMiddleware(registrar Registrar, mw ...RegistrationMiddleware) Registrar {
+//	// Loop backwards through the middleware invoking each one. Replace the
+//	// registrar with the new wrapped registrar. Looping backwards ensures that the
+//	// first middleware of the slice is the first to be executed by requests.
+//	for i := len(mw) - 1; i >= 0; i-- {
+//		u := mw[i]
+//		if u != nil {
+//			registrar = u(registrar)
+//		}
+//	}
+//	return registrar
+//}
 
 // Register send the registration for a Virtual Fiscal Device to the VFD server. The
 // registration request is signed with the private key of the certificate used to
 // authenticate the client.
 func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey,
-	request *RegistrationRequest, mw []RegistrationMiddleware,
-) (*RegistrationResponse, error) {
-	registrar := func(ctx context.Context, url string, privateKey *rsa.PrivateKey,
-		request *RegistrationRequest,
-	) (*RegistrationResponse, error) {
-		client := getHttpClientInstance().client
-		return register(ctx, client, url, privateKey, request)
-	}
-
-	registrar = wrapRegistrationMiddleware(registrar, mw...)
-
-	return registrar(ctx, requestURL, privateKey, request)
+	request *RegistrationRequest) (*RegistrationResponse, error) {
+	client := getHttpClientInstance().client
+	return register(ctx, client, requestURL, privateKey, request)
 }
 
 func register(ctx context.Context, client *http.Client, requestURL string, privateKey *rsa.PrivateKey,

@@ -37,49 +37,42 @@ type (
 		Error       string `json:"error,omitempty"`
 	}
 
-	// TokenFetcher is an interface that fetches a token from the VFD Service
-	// using the given url and the token request.
-	// If the response status code is not 200, an error is returned.
-	// The error message will contain the TokenResponse.Code and TokenResponse.Message
-	// fields.
-	TokenFetcher func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error)
-
-	TokenFetcherMiddleware func(fetcher TokenFetcher) TokenFetcher
+	//// TokenFetcher is an interface that fetches a token from the VFD Service
+	//// using the given url and the token request.
+	//// If the response status code is not 200, an error is returned.
+	//// The error message will contain the TokenResponse.Code and TokenResponse.Message
+	//// fields.
+	//TokenFetcher func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error)
+	//
+	//TokenFetcherMiddleware func(fetcher TokenFetcher) TokenFetcher
 )
 
-// wrapTokenFetcherMiddlewares wraps the token fetcher with the given middlewares.
-// The middlewares are executed in the order they are passed.
-func wrapTokenFetcherMiddlewares(fetcher TokenFetcher, mw ...TokenFetcherMiddleware) TokenFetcher {
-	// Loop backwards through the middleware invoking each one. Replace the
-	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
-	// first middleware of the slice is the first to be executed by requests.
-	for i := len(mw) - 1; i >= 0; i-- {
-		h := mw[i]
-		if h != nil {
-			fetcher = h(fetcher)
-		}
-	}
-
-	return fetcher
-}
+//// wrapTokenFetcherMiddlewares wraps the token fetcher with the given middlewares.
+//// The middlewares are executed in the order they are passed.
+//func wrapTokenFetcherMiddlewares(fetcher TokenFetcher, mw ...TokenFetcherMiddleware) TokenFetcher {
+//	// Loop backwards through the middleware invoking each one. Replace the
+//	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
+//	// first middleware of the slice is the first to be executed by requests.
+//	for i := len(mw) - 1; i >= 0; i-- {
+//		h := mw[i]
+//		if h != nil {
+//			fetcher = h(fetcher)
+//		}
+//	}
+//
+//	return fetcher
+//}
 
 // FetchToken retrieves a token from the VFD server. If the status code is not 200, an error is
 // returned. Error Message will contain TokenResponse.Code and TokenResponse.Message
 // FetchToken wraps internally a *http.Client responsible for making http calls. It has a timeout
 // of 70 seconds. It is advised to call this only when the previous token has expired. It will still
 // work if called before the token expires.
-// It is a context-aware function with a timeout of 1 minute. Middlewares can be passed to wrap the
-// fetcher with additional functionality. The middlewares are executed in the order they are passed.
-func FetchToken(ctx context.Context, url string, request *TokenRequest, mw []TokenFetcherMiddleware) (
-	*TokenResponse, error,
-) {
-	f := func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
-		httpClient := getHttpClientInstance().client
-		return fetchToken(ctx, httpClient, url, request)
-	}
-	fetcher := wrapTokenFetcherMiddlewares(f, mw...)
+// It is a context-aware function with a timeout of 1 minute
+func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
+	httpClient := getHttpClientInstance().client
 
-	return fetcher(ctx, url, request)
+	return fetchToken(ctx, httpClient, url, request)
 }
 
 // fetchToken retrieves a token from the VFD server. If the status code is not 200, an error is returned.
