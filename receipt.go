@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/rsa"
-	"encoding/base64"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -231,7 +230,7 @@ func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Cus
 	if err != nil {
 		return nil, fmt.Errorf("could not sign receipt: %w", err)
 	}
-	base64SignedReceipt := base64.StdEncoding.EncodeToString(signedReceipt)
+	base64SignedReceipt := encodeBase64Bytes(signedReceipt)
 	receiptString := string(receiptBytes)
 
 	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", receiptString, base64SignedReceipt)

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/rsa"
-	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -269,7 +268,7 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign the payload: %w", err)
 	}
-	base64PayloadSignature := base64.StdEncoding.EncodeToString(signedPayload)
+	base64PayloadSignature := encodeBase64Bytes(signedPayload)
 	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", payloadString, base64PayloadSignature)
 	report = fmt.Sprintf("%s%s", xml.Header, report)
 
