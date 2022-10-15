@@ -7,7 +7,6 @@ import (
 )
 
 func TestReceiptBytes(t *testing.T) {
-
 	// create a rsa private key
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {

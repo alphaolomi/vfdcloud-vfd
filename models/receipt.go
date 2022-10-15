@@ -109,5 +109,4 @@ func (r *RCT) RoundOff() {
 	r.TOTALS.TOTALTAXEXCL = math.Round(r.TOTALS.TOTALTAXEXCL*hundred) / hundred
 	r.TOTALS.TOTALTAXINCL = math.Round(r.TOTALS.TOTALTAXINCL*hundred) / hundred
 	r.TOTALS.DISCOUNT = math.Round(r.TOTALS.DISCOUNT*hundred) / hundred
-
 }

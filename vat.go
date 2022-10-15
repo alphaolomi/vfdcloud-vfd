@@ -128,7 +128,6 @@ func ValueAddedTaxAmount(taxCode int64, price float64) float64 {
 	netAmount := vat.NetAmount(price)
 	amount := price - netAmount
 	return math.Round(amount*100) / 100
-
 }
 
 // ReportTaxRateID creates a string that contains the ValueAddedTax rate and the ValueAddedTax id
