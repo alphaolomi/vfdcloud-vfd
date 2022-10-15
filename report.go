@@ -262,15 +262,29 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 	vats []VATTOTAL, payments []Payment,
 	totals ReportTotals,
 ) ([]byte, error) {
-	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}
-	replacer := strings.NewReplacer(replaceList...)
 	zReport := GenerateZReport(params, address, vats, payments, totals)
 	payload, err := xml.Marshal(zReport)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal the report: %w", err)
 	}
-	payloadString := replacer.Replace(string(payload))
 
+	payloadString := formatReportXmlPayload(payload, totals, vats, payments)
+
+	signedPayload, err := SignPayload(privateKey, []byte(payloadString))
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign the payload: %w", err)
+	}
+	base64PayloadSignature := base64.StdEncoding.EncodeToString(signedPayload)
+	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", payloadString, base64PayloadSignature)
+	report = fmt.Sprintf("%s%s", xml.Header, report)
+
+	return []byte(report), nil
+}
+
+func formatReportXmlPayload(payload []byte, totals ReportTotals, vats []VATTOTAL, payments []Payment) string {
+	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}
+	replacer := strings.NewReplacer(replaceList...)
+	payloadString := replacer.Replace(string(payload))
 	dailyAmountTag := fmt.Sprintf("<DAILYTOTALAMOUNT>%.2f</DAILYTOTALAMOUNT>", totals.DailyTotalAmount)
 	grossAmountTag := fmt.Sprintf("<GROSS>%.2f</GROSS>", totals.Gross)
 	netAmountTag := fmt.Sprintf("<NETTAMOUNT>%.2f</NETTAMOUNT>", vats[0].Amount)
@@ -287,14 +301,5 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 	payloadString = regexPmtAmount.ReplaceAllString(payloadString, pmtAmountTag)
 	payloadString = regexNetAmount.ReplaceAllString(payloadString, netAmountTag)
 	payloadString = regexTaxAmount.ReplaceAllString(payloadString, taxAmountTag)
-
-	signedPayload, err := SignPayload(privateKey, []byte(payloadString))
-	if err != nil {
-		return nil, fmt.Errorf("failed to sign the payload: %w", err)
-	}
-	base64PayloadSignature := base64.StdEncoding.EncodeToString(signedPayload)
-	report := fmt.Sprintf("<EFDMS>%s<EFDMSSIGNATURE>%s</EFDMSSIGNATURE></EFDMS>", payloadString, base64PayloadSignature)
-	report = fmt.Sprintf("%s%s", xml.Header, report)
-
-	return []byte(report), nil
+	return payloadString
 }
