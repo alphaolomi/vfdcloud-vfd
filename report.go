@@ -188,8 +188,8 @@ func GenerateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 
 	vats1 := make([]*models.VATTOTAL, len(vats))
 	for _, v := range vats {
-		// tax amount is the product of tax rate and amount subjected to tax
-		// divide by 100 to get the tax amount
+		// tax NetAmount is the product of tax rate and NetAmount subjected to tax
+		// divide by 100 to get the tax NetAmount
 		taxAmount := (v.Rate * v.Amount) / 100
 		rate := fmt.Sprintf("%s-%.2f", v.ID, v.Rate)
 		vats1 = append(vats1, &models.VATTOTAL{
