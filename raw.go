@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/vfdcloud/base"
-	"github.com/vfdcloud/vfd/models"
+	"github.com/vfdcloud/vfd/internal/models"
 )
 
 type (
@@ -54,7 +54,7 @@ func SubmitRawRequest(ctx context.Context, headers *RequestHeaders, raw *RawRequ
 	}
 
 	req.Header.Set("Content-Type", ContentTypeXML)
-	req.Header.Set("Cert-Serial", EncodeBase64String(certSerial))
+	req.Header.Set("Cert-Serial", encodeBase64String(certSerial))
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
 
 	if raw.Action == SubmitReceiptAction {

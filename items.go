@@ -3,7 +3,7 @@ package vfd
 import (
 	"fmt"
 
-	"github.com/vfdcloud/vfd/models"
+	"github.com/vfdcloud/vfd/internal/models"
 )
 
 type (
@@ -20,10 +20,10 @@ type (
 	}
 )
 
-// ProcessItems processes the []Items in the submitted receipt request
+// processItems processes the []Items in the submitted receipt request
 // and create []*models.ITEM which is used to create the xml request also
 // calculates the total discount, total tax exclusive and total tax inclusive
-func ProcessItems(items []Item) *ItemProcessResponse {
+func processItems(items []Item) *ItemProcessResponse {
 	var (
 		DISCOUNT          = 0.0
 		TOTALTAXEXCLUSIVE = 0.0

@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/vfdcloud/vfd/models"
+	"github.com/vfdcloud/vfd/internal/models"
 )
 
 var ErrRegistrationFailed = errors.New("registration failed")
@@ -132,7 +132,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 	var (
 		taxIdNumber = request.Tin
 		certKey     = request.CertKey
-		certSerial  = EncodeBase64String(request.CertSerial)
+		certSerial  = encodeBase64String(request.CertSerial)
 	)
 
 	reg := models.REGDATA{
@@ -150,7 +150,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 		return nil, err
 	}
 
-	signedPayloadBase64 := EncodeBase64Bytes(signedPayload)
+	signedPayloadBase64 := encodeBase64Bytes(signedPayload)
 	requestPayload := models.REGDATAEFDMS{
 		REGDATA:        reg,
 		EFDMSSIGNATURE: signedPayloadBase64,

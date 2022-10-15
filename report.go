@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/vfdcloud/vfd/models"
+	"github.com/vfdcloud/vfd/internal/models"
 )
 
 var ErrReportSubmitFailed = fmt.Errorf("report submit failed")
@@ -106,7 +106,7 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 
 	req.Header.Set("Content-Type", ContentTypeXML)
 	req.Header.Set("Routing-Key", SubmitReportRoutingKey)
-	req.Header.Set("Cert-Serial", EncodeBase64String(certSerial))
+	req.Header.Set("Cert-Serial", encodeBase64String(certSerial))
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
 
 	resp, err := client.Do(req)
@@ -168,7 +168,7 @@ func (lines *Address) AsList() []string {
 	}
 }
 
-func GenerateZReport(params *ReportParams, address Address, vats []VATTOTAL, payments []Payment, totals ReportTotals) *models.ZREPORT {
+func generateZReport(params *ReportParams, address Address, vats []VATTOTAL, payments []Payment, totals ReportTotals) *models.ZREPORT {
 	const (
 		SIMIMSI       = "WEBAPI"
 		FWVERSION     = "3.0"
@@ -259,7 +259,7 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 	vats []VATTOTAL, payments []Payment,
 	totals ReportTotals,
 ) ([]byte, error) {
-	zReport := GenerateZReport(params, address, vats, payments, totals)
+	zReport := generateZReport(params, address, vats, payments, totals)
 	payload, err := xml.Marshal(zReport)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal the report: %w", err)

@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/vfdcloud/base"
-	"github.com/vfdcloud/vfd/models"
+	"github.com/vfdcloud/vfd/internal/models"
 )
 
 var ErrReceiptUploadFailed = errors.New("receipt upload failed")
@@ -126,7 +126,7 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 
 	req.Header.Set("Content-Type", ContentTypeXML)
 	req.Header.Set("Routing-Key", SubmitReceiptRoutingKey)
-	req.Header.Set("Cert-Serial", EncodeBase64String(certSerial))
+	req.Header.Set("Cert-Serial", encodeBase64String(certSerial))
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", bearerToken))
 
 	resp, err := client.Do(req)
@@ -170,7 +170,7 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 	}, nil
 }
 
-func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, payments []Payment) *models.RCT {
+func generateReceipt(params ReceiptParams, customer Customer, items []Item, payments []Payment) *models.RCT {
 	rctPayments := make([]*models.PAYMENT, len(payments))
 	for i, payment := range payments {
 		rctPayments[i] = &models.PAYMENT{
@@ -179,7 +179,7 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 		}
 	}
 
-	RESULTS := ProcessItems(items)
+	RESULTS := processItems(items)
 	ITEMS := models.ITEMS{ITEM: RESULTS.ITEMS}
 	TOTALS := RESULTS.TOTALS
 	VATTOTALS := models.VATTOTALS{VATTOTAL: RESULTS.VATTOTALS}
@@ -215,7 +215,7 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer,
 	items []Item, payments []Payment,
 ) ([]byte, error) {
-	receipt := GenerateReceipt(params, customer, items, payments)
+	receipt := generateReceipt(params, customer, items, payments)
 	receiptBytes, err := xml.Marshal(receipt)
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal receipt: %w", err)
