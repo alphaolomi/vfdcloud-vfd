@@ -192,12 +192,13 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 		price := item.Price
 		taxCode := item.TaxCode
 		discount := item.Discount
+		amount := qty * price
 		rctItems[i] = &models.ITEM{
 			ID:      id,
 			DESC:    desc,
 			QTY:     qty,
 			TAXCODE: taxCode,
-			AMT:     price,
+			AMT:     amount,
 		}
 
 		// add discount
