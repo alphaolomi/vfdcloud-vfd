@@ -75,13 +75,12 @@ type (
 		Amount float64
 	}
 
-	// VATTOTAL contains information about how much ValueAddedTax rate was used
-	// Standard ValueAddedTax rate is 18%
-	// e.g VATTOTAL{ID:"A",Rate: 18, Amount: 1000}.
+	// VATTOTAL represent the VAT details.
 	VATTOTAL struct {
-		ID     string
-		Rate   float64
-		Amount float64
+		ID        string
+		Rate      float64
+		TaxAmount float64
+		NetAmount float64
 	}
 
 	// Response contains details returned when submitting a receipt to the VFD Service

@@ -45,9 +45,9 @@ func TestReportBytes(t *testing.T) {
 				},
 				vats: []VATTOTAL{
 					{
-						ID:     StandardVATID,
-						Rate:   StandardVATRATE,
-						Amount: 20000000000,
+						ID:        StandardVATID,
+						Rate:      StandardVATRATE,
+						TaxAmount: 20000000000,
 					},
 				},
 				payments: []Payment{

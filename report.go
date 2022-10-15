@@ -186,18 +186,19 @@ func GenerateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 		})
 	}
 
+	PAYMENTS := models.PAYMENTS{PAYMENT: payments1}
+
 	vats1 := make([]*models.VATTOTAL, len(vats))
 	for _, v := range vats {
-		// tax NetAmount is the product of tax rate and NetAmount subjected to tax
-		// divide by 100 to get the tax NetAmount
-		taxAmount := (v.Rate * v.Amount) / 100
 		rate := fmt.Sprintf("%s-%.2f", v.ID, v.Rate)
 		vats1 = append(vats1, &models.VATTOTAL{
 			VATRATE:    rate,
-			NETTAMOUNT: v.Amount,
-			TAXAMOUNT:  taxAmount,
+			NETTAMOUNT: v.NetAmount,
+			TAXAMOUNT:  v.TaxAmount,
 		})
 	}
+
+	VATTOTALS := models.VATTOTALS{VATTOTAL: vats1}
 
 	TT := models.REPORTTOTALS{
 		DAILYTOTALAMOUNT: totals.DailyTotalAmount,
@@ -231,12 +232,8 @@ func GenerateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 		USER:             "",
 		SIMIMSI:          SIMIMSI,
 		TOTALS:           TT,
-		VATTOTALS: models.VATTOTALS{
-			VATTOTAL: vats1,
-		},
-		PAYMENTS: models.PAYMENTS{
-			PAYMENT: payments1,
-		},
+		VATTOTALS:        VATTOTALS,
+		PAYMENTS:         PAYMENTS,
 		CHANGES: struct {
 			Text          string `xml:",chardata"`
 			VATCHANGENUM  string `xml:"VATCHANGENUM"`
@@ -287,9 +284,10 @@ func formatReportXmlPayload(payload []byte, totals ReportTotals, vats []VATTOTAL
 	payloadString := replacer.Replace(string(payload))
 	dailyAmountTag := fmt.Sprintf("<DAILYTOTALAMOUNT>%.2f</DAILYTOTALAMOUNT>", totals.DailyTotalAmount)
 	grossAmountTag := fmt.Sprintf("<GROSS>%.2f</GROSS>", totals.Gross)
-	netAmountTag := fmt.Sprintf("<NETTAMOUNT>%.2f</NETTAMOUNT>", vats[0].Amount)
+
+	netAmountTag := fmt.Sprintf("<NETTAMOUNT>%.2f</NETTAMOUNT>", vats[0].TaxAmount)
 	pmtAmountTag := fmt.Sprintf("<PMTAMOUNT>%.2f</PMTAMOUNT>", payments[0].Amount)
-	taxAmountTag := fmt.Sprintf("<TAXAMOUNT>%.2f</TAXAMOUNT>", vats[0].Amount)
+	taxAmountTag := fmt.Sprintf("<TAXAMOUNT>%.2f</TAXAMOUNT>", vats[0].TaxAmount)
 	regexDailyAmount := regexp.MustCompile(`<DAILYTOTALAMOUNT>.*</DAILYTOTALAMOUNT>`)
 	regexGrossAmount := regexp.MustCompile(`<GROSS>.*</GROSS>`)
 	regexPmtAmount := regexp.MustCompile(`<PMTAMOUNT>.*</PMTAMOUNT>`)
@@ -301,5 +299,6 @@ func formatReportXmlPayload(payload []byte, totals ReportTotals, vats []VATTOTAL
 	payloadString = regexPmtAmount.ReplaceAllString(payloadString, pmtAmountTag)
 	payloadString = regexNetAmount.ReplaceAllString(payloadString, netAmountTag)
 	payloadString = regexTaxAmount.ReplaceAllString(payloadString, taxAmountTag)
+
 	return payloadString
 }
