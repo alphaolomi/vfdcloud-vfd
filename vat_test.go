@@ -66,6 +66,13 @@ func TestValueAddedTaxAmount(t *testing.T) {
 				price:   5000,
 			},
 		},
+		{
+			name: "StandardVAT",
+			args: args{
+				taxCode: StandardVATCODE,
+				price:   200,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
