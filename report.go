@@ -145,7 +145,8 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 }
 
 func SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	report *ReportRequest) (*Response, error) {
+	report *ReportRequest,
+) (*Response, error) {
 	client := getHttpClientInstance().client
 	return submitReport(ctx, client, url, headers, privateKey, report)
 }

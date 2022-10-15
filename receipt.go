@@ -74,7 +74,8 @@ type (
 
 // SubmitReceipt uploads a receipt to the VFD server.
 func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	receiptRequest *ReceiptRequest) (*Response, error) {
+	receiptRequest *ReceiptRequest,
+) (*Response, error) {
 	client := getHttpClientInstance().client
 	return submitReceipt(ctx, client, requestURL, headers, privateKey, receiptRequest)
 }

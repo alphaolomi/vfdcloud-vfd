@@ -112,7 +112,8 @@ func responseFormat(response *models.REGDATARESP) *RegistrationResponse {
 // registration request is signed with the private key of the certificate used to
 // authenticate the client.
 func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey,
-	request *RegistrationRequest) (*RegistrationResponse, error) {
+	request *RegistrationRequest,
+) (*RegistrationResponse, error) {
 	client := getHttpClientInstance().client
 	return register(ctx, client, requestURL, privateKey, request)
 }
