@@ -32,7 +32,7 @@ func TestNetPrice(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NetAmount(tt.args.taxCode, tt.args.price)
-			vat := parseTaxCode(tt.args.taxCode)
+			vat := ParseTaxCode(tt.args.taxCode)
 			rate := vat.Percentage / 100
 			total := got + (got * rate)
 			total = math.Floor(total*100) / 100

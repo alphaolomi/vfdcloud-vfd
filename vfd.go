@@ -75,8 +75,8 @@ type (
 		Amount float64
 	}
 
-	// VATTOTAL contains information about how much vat rate was used
-	// Standard vat rate is 18%
+	// VATTOTAL contains information about how much ValueAddedTax rate was used
+	// Standard ValueAddedTax rate is 18%
 	// e.g VATTOTAL{ID:"A",Rate: 18, Amount: 1000}.
 	VATTOTAL struct {
 		ID     string

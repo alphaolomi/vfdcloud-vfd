@@ -106,18 +106,18 @@ type (
 // to 2 decimal places.
 func (r *RCT) RoundOff() {
 	// RoundOff all the RCT.TOTALS
-	r.TOTALS.TOTALTAXEXCL = math.Floor(r.TOTALS.TOTALTAXEXCL*hundred) / hundred
-	r.TOTALS.TOTALTAXINCL = math.Floor(r.TOTALS.TOTALTAXINCL*hundred) / hundred
-	r.TOTALS.DISCOUNT = math.Floor(r.TOTALS.DISCOUNT*hundred) / hundred
+	r.TOTALS.TOTALTAXEXCL = math.Round(r.TOTALS.TOTALTAXEXCL*hundred) / hundred
+	r.TOTALS.TOTALTAXINCL = math.Round(r.TOTALS.TOTALTAXINCL*hundred) / hundred
+	r.TOTALS.DISCOUNT = math.Round(r.TOTALS.DISCOUNT*hundred) / hundred
 
 	// RoundOff all the RCT.PAYMENTS
 	for i := 0; i < len(r.PAYMENTS.PAYMENT); i++ {
-		r.PAYMENTS.PAYMENT[i].PMTAMOUNT = math.Floor(r.PAYMENTS.PAYMENT[i].PMTAMOUNT*hundred) / hundred
+		r.PAYMENTS.PAYMENT[i].PMTAMOUNT = math.Round(r.PAYMENTS.PAYMENT[i].PMTAMOUNT*hundred) / hundred
 	}
 
 	// RoundOff all the RCT.VATTOTALS
 	for i := 0; i < len(r.VATTOTALS.VATTOTAL); i++ {
-		r.VATTOTALS.VATTOTAL[i].NETTAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].NETTAMOUNT*hundred) / hundred
-		r.VATTOTALS.VATTOTAL[i].TAXAMOUNT = math.Floor(r.VATTOTALS.VATTOTAL[i].TAXAMOUNT*hundred) / hundred
+		r.VATTOTALS.VATTOTAL[i].NETTAMOUNT = math.Round(r.VATTOTALS.VATTOTAL[i].NETTAMOUNT*hundred) / hundred
+		r.VATTOTALS.VATTOTAL[i].TAXAMOUNT = math.Round(r.VATTOTALS.VATTOTAL[i].TAXAMOUNT*hundred) / hundred
 	}
 }

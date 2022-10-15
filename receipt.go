@@ -171,54 +171,6 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 }
 
 func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, payments []Payment) *models.RCT {
-	rctItems := make([]*models.ITEM, len(items))
-	totals := &models.TOTALS{
-		TOTALTAXEXCL: 0,
-		TOTALTAXINCL: 0,
-		DISCOUNT:     0,
-	}
-	rctVatTotals := make([]*models.VATTOTAL, 0)
-	vt := &models.VATTOTAL{
-		VATRATE:    "A",
-		NETTAMOUNT: 0,
-		TAXAMOUNT:  0,
-	}
-	totalTax := 0.0
-
-	for i, item := range items {
-		id := item.ID
-		desc := item.Description
-		qty := item.Quantity
-		price := item.Price
-		taxCode := item.TaxCode
-		discount := item.Discount
-		amount := qty * price
-		rctItems[i] = &models.ITEM{
-			ID:      id,
-			DESC:    desc,
-			QTY:     qty,
-			TAXCODE: taxCode,
-			AMT:     amount,
-		}
-
-		// add discount
-		totals.DISCOUNT += discount
-		amountPaidTaxInclusive := price * qty
-		itemTax := amountPaidTaxInclusive * 0.18
-		amountPaidWithoutTax := amountPaidTaxInclusive - itemTax
-		totalTax += itemTax
-
-		vt.TAXAMOUNT += itemTax
-		vt.NETTAMOUNT += amountPaidWithoutTax
-		// add totals tax inclusive
-		totals.TOTALTAXINCL += amountPaidTaxInclusive
-
-	}
-
-	// add totals tax exclusive
-	totals.TOTALTAXEXCL = totals.TOTALTAXINCL - totalTax
-
-	// make payments
 	rctPayments := make([]*models.PAYMENT, len(payments))
 	for i, payment := range payments {
 		rctPayments[i] = &models.PAYMENT{
@@ -227,10 +179,13 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 		}
 	}
 
-	// add vat totals
-	rctVatTotals = append(rctVatTotals, vt)
+	RESULTS := ProcessItems(items)
+	ITEMS := models.ITEMS{ITEM: RESULTS.ITEMS}
+	TOTALS := RESULTS.TOTALS
+	VATTOTALS := models.VATTOTALS{VATTOTAL: RESULTS.VATTOTALS}
+	PAYMENTS := models.PAYMENTS{PAYMENT: rctPayments}
 
-	rct := &models.RCT{
+	RECEIPT := &models.RCT{
 		DATE:       params.Date,
 		TIME:       params.Time,
 		TIN:        params.TIN,
@@ -245,22 +200,16 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 		GC:         params.GlobalCounter,
 		ZNUM:       params.ZNum,
 		RCTVNUM:    params.ReceiptVNum,
-		ITEMS: models.ITEMS{
-			ITEM: rctItems,
-		},
-		TOTALS: *totals,
-		PAYMENTS: models.PAYMENTS{
-			PAYMENT: rctPayments,
-		},
-		VATTOTALS: models.VATTOTALS{
-			VATTOTAL: rctVatTotals,
-		},
+		ITEMS:      ITEMS,
+		TOTALS:     TOTALS,
+		PAYMENTS:   PAYMENTS,
+		VATTOTALS:  VATTOTALS,
 	}
 
 	// round off all values to 2 decimal places
-	rct.RoundOff()
+	RECEIPT.RoundOff()
 
-	return rct
+	return RECEIPT
 }
 
 func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Customer,

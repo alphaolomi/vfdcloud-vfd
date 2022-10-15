@@ -24,62 +24,62 @@ const (
 )
 
 type (
-	vat struct {
-		ID         string // ID is a character that identifies the vat it can be A,B,C,D or E
-		Code       int64  // Code is a number that identifies the vat it can be 0,1,2,3 or 4
+	ValueAddedTax struct {
+		ID         string // ID is a character that identifies the ValueAddedTax it can be A,B,C,D or E
+		Code       int64  // Code is a number that identifies the ValueAddedTax it can be 0,1,2,3 or 4
 		Name       string
 		Percentage float64
 	}
 )
 
 var (
-	standardVAT = vat{
+	standardVAT = ValueAddedTax{
 		ID:         StandardVATID,
 		Code:       StandardVATCODE,
-		Name:       "Standard vat",
+		Name:       "Standard ValueAddedTax",
 		Percentage: StandardVATRATE,
 	}
-	specialVAT = vat{
+	specialVAT = ValueAddedTax{
 		ID:         SpecialVATID,
 		Code:       SpecialVATCODE,
-		Name:       "Special vat",
+		Name:       "Special ValueAddedTax",
 		Percentage: SpecialVATRATE,
 	}
-	zeroVAT = vat{
+	zeroVAT = ValueAddedTax{
 		ID:         ZeroVATID,
 		Code:       ZeroVATCODE,
-		Name:       "Zero vat",
+		Name:       "Zero ValueAddedTax",
 		Percentage: ZeroVATRATE,
 	}
-	specialReliefVAT = vat{
+	specialReliefVAT = ValueAddedTax{
 		ID:         SpecialReliefVATID,
 		Code:       SpecialReliefVATCODE,
-		Name:       "Special Relief vat",
+		Name:       "Special Relief ValueAddedTax",
 		Percentage: SpecialReliefVATRATE,
 	}
-	exemptedVAT = vat{
+	exemptedVAT = ValueAddedTax{
 		ID:         ExemptedVATID,
 		Code:       ExemptedVATCODE,
-		Name:       "Exempted vat",
+		Name:       "Exempted ValueAddedTax",
 		Percentage: ExemptedVATRATE,
 	}
 )
 
-func (v *vat) NetAmount(totalAmount float64) float64 {
+func (v *ValueAddedTax) NetAmount(totalAmount float64) float64 {
 	rate := 1.00 + (v.Percentage / 100)
 	netAmount := totalAmount / rate
 	return math.Round(netAmount*100) / 100
 }
 
-// Amount calculates the amount of vat that is charged to the buyer.
+// Amount calculates the amount of ValueAddedTax that is charged to the buyer.
 // The answer is rounded to 2 decimal places.
-func (v *vat) Amount(totalAmount float64) float64 {
+func (v *ValueAddedTax) Amount(totalAmount float64) float64 {
 	netAmount := v.NetAmount(totalAmount)
 	amount := totalAmount - netAmount
 	return math.Round(amount*100) / 100
 }
 
-func parseTaxCode(code int64) vat {
+func ParseTaxCode(code int64) ValueAddedTax {
 	switch code {
 	case 1:
 		return standardVAT
@@ -96,46 +96,46 @@ func parseTaxCode(code int64) vat {
 	}
 }
 
-// ValueAddedTaxRate returns the vat rate of a certain vat category
+// ValueAddedTaxRate returns the ValueAddedTax rate of a certain ValueAddedTax category
 func ValueAddedTaxRate(taxCode int64) float64 {
-	vat := parseTaxCode(taxCode)
+	vat := ParseTaxCode(taxCode)
 	return vat.Percentage
 }
 
-// ValueAddedTaxID returns the vat id of a certain vat category
-// It returns "A" for standard vat, "B" for special vat,
-// "C" for zero vat,"D" for special relief and "E" for
-// exempted vat.
+// ValueAddedTaxID returns the ValueAddedTax id of a certain ValueAddedTax category
+// It returns "A" for standard ValueAddedTax, "B" for special ValueAddedTax,
+// "C" for zero ValueAddedTax,"D" for special relief and "E" for
+// exempted ValueAddedTax.
 func ValueAddedTaxID(taxCode int64) string {
-	vat := parseTaxCode(taxCode)
+	vat := ParseTaxCode(taxCode)
 	return vat.ID
 }
 
-// NetAmount calculates the net price of a product of a certain vat category.
-// This is the NetAmount which is collected by the seller without the vat.
-// The buyer is charged this NetAmount plus the vat NetAmount. After calculating the
+// NetAmount calculates the net price of a product of a certain ValueAddedTax category.
+// This is the NetAmount which is collected by the seller without the ValueAddedTax.
+// The buyer is charged this NetAmount plus the ValueAddedTax NetAmount. After calculating the
 // answer is rounded to 2 decimal places.
 // price = netPrice + netPrice * (vatRate / 100)
 func NetAmount(taxCode int64, price float64) float64 {
-	vat := parseTaxCode(taxCode)
+	vat := ParseTaxCode(taxCode)
 	return vat.NetAmount(price)
 }
 
-// ValueAddedTaxAmount calculates the amount of vat that is charged to the buyer.
+// ValueAddedTaxAmount calculates the amount of ValueAddedTax that is charged to the buyer.
 // The answer is rounded to 2 decimal places.
 func ValueAddedTaxAmount(taxCode int64, price float64) float64 {
-	vat := parseTaxCode(taxCode)
+	vat := ParseTaxCode(taxCode)
 	netAmount := vat.NetAmount(price)
 	amount := price - netAmount
 	return math.Round(amount*100) / 100
 
 }
 
-// ReportTaxRateID creates a string that contains the vat rate and the vat id
-// of a certain vat category. It returns "A-18.00" for standard vat,
-// "B-10.00" for special vat, "C-0.00" for zero vat and so on. The ID is then
-// used in Z Report to indicate the vat rate and the vat id.
+// ReportTaxRateID creates a string that contains the ValueAddedTax rate and the ValueAddedTax id
+// of a certain ValueAddedTax category. It returns "A-18.00" for standard ValueAddedTax,
+// "B-10.00" for special ValueAddedTax, "C-0.00" for zero ValueAddedTax and so on. The ID is then
+// used in Z Report to indicate the ValueAddedTax rate and the ValueAddedTax id.
 func ReportTaxRateID(taxCode int64) string {
-	vat := parseTaxCode(taxCode)
+	vat := ParseTaxCode(taxCode)
 	return fmt.Sprintf("%s-%.2f", vat.ID, vat.Percentage)
 }
