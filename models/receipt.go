@@ -78,8 +78,8 @@ type (
 		XMLName    xml.Name `xml:"VATTOTAL"`
 		Text       string   `xml:",chardata"`
 		VATRATE    string   `xml:"VATRATE"`
-		NETTAMOUNT float64  `xml:"NETTAMOUNT"`
-		TAXAMOUNT  float64  `xml:"TAXAMOUNT"`
+		NETTAMOUNT string   `xml:"NETTAMOUNT"`
+		TAXAMOUNT  string   `xml:"TAXAMOUNT"`
 	}
 
 	VATTOTALS struct {
@@ -92,7 +92,7 @@ type (
 		XMLName   xml.Name `xml:"PAYMENT"`
 		Text      string   `xml:",chardata"`
 		PMTTYPE   string   `xml:"PMTTYPE"`
-		PMTAMOUNT float64  `xml:"PMTAMOUNT"`
+		PMTAMOUNT string   `xml:"PMTAMOUNT"`
 	}
 
 	PAYMENTS struct {
@@ -110,14 +110,4 @@ func (r *RCT) RoundOff() {
 	r.TOTALS.TOTALTAXINCL = math.Round(r.TOTALS.TOTALTAXINCL*hundred) / hundred
 	r.TOTALS.DISCOUNT = math.Round(r.TOTALS.DISCOUNT*hundred) / hundred
 
-	// RoundOff all the RCT.PAYMENTS
-	for i := 0; i < len(r.PAYMENTS.PAYMENT); i++ {
-		r.PAYMENTS.PAYMENT[i].PMTAMOUNT = math.Round(r.PAYMENTS.PAYMENT[i].PMTAMOUNT*hundred) / hundred
-	}
-
-	// RoundOff all the RCT.VATTOTALS
-	for i := 0; i < len(r.VATTOTALS.VATTOTAL); i++ {
-		r.VATTOTALS.VATTOTAL[i].NETTAMOUNT = math.Round(r.VATTOTALS.VATTOTAL[i].NETTAMOUNT*hundred) / hundred
-		r.VATTOTALS.VATTOTAL[i].TAXAMOUNT = math.Round(r.VATTOTALS.VATTOTAL[i].TAXAMOUNT*hundred) / hundred
-	}
 }

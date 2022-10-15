@@ -47,13 +47,28 @@ func TestReportBytes(t *testing.T) {
 					{
 						ID:        StandardVATID,
 						Rate:      StandardVATRATE,
+						NetAmount: 14000000000,
 						TaxAmount: 20000000000,
+					},
+					{
+						ID:        ZeroVATID,
+						Rate:      ZeroVATRATE,
+						TaxAmount: 167500000000,
+						NetAmount: 230000000000,
 					},
 				},
 				payments: []Payment{
 					{
 						Type:   CashPaymentType,
 						Amount: 200000000000,
+					},
+					{
+						Type:   CreditCardPaymentType,
+						Amount: 900000000000,
+					},
+					{
+						Type:   ElectronicPaymentType,
+						Amount: 1400000000000,
 					},
 				},
 				totals: ReportTotals{

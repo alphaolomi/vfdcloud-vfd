@@ -182,7 +182,7 @@ func GenerateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 	for _, p := range payments {
 		payments1 = append(payments1, &models.PAYMENT{
 			PMTTYPE:   string(p.Type),
-			PMTAMOUNT: p.Amount,
+			PMTAMOUNT: fmt.Sprintf("%.2f", p.Amount),
 		})
 	}
 
@@ -193,8 +193,8 @@ func GenerateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 		rate := fmt.Sprintf("%s-%.2f", v.ID, v.Rate)
 		vats1 = append(vats1, &models.VATTOTAL{
 			VATRATE:    rate,
-			NETTAMOUNT: v.NetAmount,
-			TAXAMOUNT:  v.TaxAmount,
+			NETTAMOUNT: fmt.Sprintf("%.2f", v.NetAmount),
+			TAXAMOUNT:  fmt.Sprintf("%.2f", v.TaxAmount),
 		})
 	}
 
@@ -281,29 +281,13 @@ func formatReportXmlPayload(payload []byte, totals ReportTotals, vats []VATTOTAL
 	replacer := strings.NewReplacer(replaceList...)
 	payloadString := replacer.Replace(string(payload))
 
-	// regexes
 	var (
-		regexDailyAmount   = regexp.MustCompile(`<DAILYTOTALAMOUNT>.*</DAILYTOTALAMOUNT>`)
-		regexGrossAmount   = regexp.MustCompile(`<GROSS>.*</GROSS>`)
-		regexPaymentAmount = regexp.MustCompile(`<PMTAMOUNT>.*</PMTAMOUNT>`)
-		regexNetAmount     = regexp.MustCompile(`<NETTAMOUNT>.*</NETTAMOUNT>`)
-		regexTaxAmount     = regexp.MustCompile(`<TAXAMOUNT>.*</TAXAMOUNT>`)
-		dailyAmountTag     = fmt.Sprintf("<DAILYTOTALAMOUNT>%.2f</DAILYTOTALAMOUNT>", totals.DailyTotalAmount)
-		grossAmountTag     = fmt.Sprintf("<GROSS>%.2f</GROSS>", totals.Gross)
+		regexDailyAmount = regexp.MustCompile(`<DAILYTOTALAMOUNT>.*</DAILYTOTALAMOUNT>`)
+		regexGrossAmount = regexp.MustCompile(`<GROSS>.*</GROSS>`)
+		dailyAmountTag   = fmt.Sprintf("<DAILYTOTALAMOUNT>%.2f</DAILYTOTALAMOUNT>", totals.DailyTotalAmount)
+		grossAmountTag   = fmt.Sprintf("<GROSS>%.2f</GROSS>", totals.Gross)
 	)
-	// loop through the vats and payments and replace the tags with the correct values
-	for i := 0; i < len(vats); i++ {
-		netAmountTag := fmt.Sprintf("${1}<NETTAMOUNT>%.2f</NETTAMOUNT>$2", vats[i].NetAmount)
-		taxAmountTag := fmt.Sprintf("${1}<TAXAMOUNT>%.2f</TAXAMOUNT>$2", vats[i].TaxAmount)
-		payloadString = regexNetAmount.ReplaceAllString(payloadString, netAmountTag)
-		payloadString = regexTaxAmount.ReplaceAllString(payloadString, taxAmountTag)
-	}
 
-	for i := 0; i < len(payments); i++ {
-		pmtAmountTag := fmt.Sprintf("${1}<PMTAMOUNT>%.2f</PMTAMOUNT>$2", payments[i].Amount)
-		payloadString = regexPaymentAmount.ReplaceAllString(payloadString, pmtAmountTag)
-	}
-	// replace all the occurrences of the regex with the correct value
 	payloadString = regexDailyAmount.ReplaceAllString(payloadString, dailyAmountTag)
 	payloadString = regexGrossAmount.ReplaceAllString(payloadString, grossAmountTag)
 

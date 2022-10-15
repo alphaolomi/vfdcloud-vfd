@@ -1,6 +1,7 @@
 package vfd
 
 import (
+	"fmt"
 	"github.com/vfdcloud/vfd/models"
 )
 
@@ -9,6 +10,12 @@ type (
 		ITEMS     []*models.ITEM
 		VATTOTALS []*models.VATTOTAL
 		TOTALS    models.TOTALS
+	}
+
+	vatTotal struct {
+		VATRATE    string
+		NETTAMOUNT float64
+		TAXAMOUNT  float64
 	}
 )
 
@@ -24,7 +31,7 @@ func ProcessItems(items []Item) *ItemProcessResponse {
 	)
 	// initialize map that will store the tax code and total amount of tax collected
 	// over all items with the same tax code. The map keys are the tax codes.
-	vatTotals := make(map[string]*models.VATTOTAL)
+	vatTotals := make(map[string]*vatTotal)
 	var ITEMS []*models.ITEM
 	for _, item := range items {
 		itemAmount := item.Quantity * item.Price
@@ -47,7 +54,7 @@ func ProcessItems(items []Item) *ItemProcessResponse {
 
 		// check if the tax code is already in the map if not add it
 		if _, ok := vatTotals[vatID]; !ok {
-			vatTotals[vatID] = &models.VATTOTAL{
+			vatTotals[vatID] = &vatTotal{
 				VATRATE:    vatID,
 				NETTAMOUNT: NETAMOUNT,
 				TAXAMOUNT:  TAXAMOUNT,
@@ -60,7 +67,12 @@ func ProcessItems(items []Item) *ItemProcessResponse {
 
 	VATTOTALS := make([]*models.VATTOTAL, 0)
 	for _, v := range vatTotals {
-		VATTOTALS = append(VATTOTALS, v)
+		V := &models.VATTOTAL{
+			VATRATE:    v.VATRATE,
+			NETTAMOUNT: fmt.Sprintf("%.2f", v.NETTAMOUNT),
+			TAXAMOUNT:  fmt.Sprintf("%.2f", v.TAXAMOUNT),
+		}
+		VATTOTALS = append(VATTOTALS, V)
 	}
 	TOTALS := models.TOTALS{
 		TOTALTAXEXCL: TOTALTAXEXCLUSIVE,

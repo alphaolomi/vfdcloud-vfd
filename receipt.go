@@ -175,7 +175,7 @@ func GenerateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 	for i, payment := range payments {
 		rctPayments[i] = &models.PAYMENT{
 			PMTTYPE:   string(payment.Type),
-			PMTAMOUNT: payment.Amount,
+			PMTAMOUNT: fmt.Sprintf("%.2f", payment.Amount),
 		}
 	}
 
