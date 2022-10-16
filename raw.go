@@ -25,7 +25,7 @@ type (
 // content of the file is read and submitted to the server as is.
 func SubmitRawRequest(ctx context.Context, headers *RequestHeaders, raw *RawRequest) (*Response, error) {
 	var (
-		client      = getHttpClientInstance().client
+		client      = clientInstance().INSTANCE
 		certSerial  = headers.CertSerial
 		bearerToken = headers.BearerToken
 		reqURL      = RequestURL(raw.Env, raw.Action)

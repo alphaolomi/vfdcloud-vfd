@@ -21,6 +21,10 @@ const (
 	ExemptedVATID        = "E"
 	ExemptedVATRATE      = 0.00
 	ExemptedVATCODE      = 5
+	TaxableItemCode      = 1
+	TaxableItemId        = "A"
+	NonTaxableItemCode   = 3
+	NonTaxableItemId     = "C"
 )
 
 type (

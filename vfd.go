@@ -41,7 +41,7 @@ const (
 
 type (
 	// Action signifies the action to be performed among the four defined actions
-	// which are client registration, token fetching, submission of receipt and
+	// which are INSTANCE registration, token fetching, submission of receipt and
 	// submission of report.
 	Action     string
 	requestURL struct {

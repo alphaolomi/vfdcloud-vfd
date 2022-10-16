@@ -110,11 +110,11 @@ func responseFormat(response *models.REGDATARESP) *RegistrationResponse {
 
 // Register send the registration for a Virtual Fiscal Device to the VFD server. The
 // registration request is signed with the private key of the certificate used to
-// authenticate the client.
+// authenticate the INSTANCE.
 func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey,
 	request *RegistrationRequest,
 ) (*RegistrationResponse, error) {
-	client := getHttpClientInstance().client
+	client := clientInstance().INSTANCE
 	return register(ctx, client, requestURL, privateKey, request)
 }
 
@@ -163,7 +163,7 @@ func register(ctx context.Context, client *http.Client, requestURL string, priva
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("client error: %v: %w", ErrRegistrationFailed, err)
+		return nil, fmt.Errorf("INSTANCE error: %v: %w", ErrRegistrationFailed, err)
 	}
 
 	defer func(Body io.ReadCloser) {

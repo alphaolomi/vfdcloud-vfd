@@ -70,7 +70,7 @@ type (
 // work if called before the token expires.
 // It is a context-aware function with a timeout of 1 minute
 func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
-	httpClient := getHttpClientInstance().client
+	httpClient := clientInstance().INSTANCE
 
 	return fetchToken(ctx, httpClient, url, request)
 }
@@ -100,7 +100,7 @@ func fetchToken(ctx context.Context, client *http.Client, path string, request *
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("client call error: %w: %v", ErrFetchToken, err)
+		return nil, fmt.Errorf("INSTANCE call error: %w: %v", ErrFetchToken, err)
 	}
 	defer resp.Body.Close()
 
