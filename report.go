@@ -57,26 +57,7 @@ type (
 		VATS    []VATTOTAL
 		Payment []Payment
 	}
-	//
-	//ReportSubmitter func(ctx context.Context, url string, headers *RequestHeaders,
-	//	privateKey *rsa.PrivateKey,
-	//	report *ReportRequest) (*Response, error)
-	//
-	//ReportSubmitMiddleware func(next ReportSubmitter) ReportSubmitter
 )
-
-//// wrapReportSubmitterMiddleware wraps a ReportSubmitter with a list of ReportSubmitMiddleware.
-//func wrapReportSubmitterMiddleware(submitter ReportSubmitter, mw ...ReportSubmitMiddleware,
-//) ReportSubmitter {
-//	// Loop backwards through the middleware invoking each one. Replace the
-//	// submitter with the new wrapped submitter. Looping backwards ensures that the
-//	// first middleware of the slice is the first to be executed by requests.
-//	for i := len(mw) - 1; i >= 0; i-- {
-//		submitter = mw[i](submitter)
-//	}
-//
-//	return submitter
-//}
 
 // submitReport submits a report to the VFD server.
 func submitReport(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,

@@ -73,20 +73,6 @@ func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeade
 	return submitReceipt(ctx, client, requestURL, headers, privateKey, receiptRequest)
 }
 
-//func wrapReceiptSubmitMiddlewares(uploader ReceiptSubmitter, mw ...ReceiptSubmitMiddleware) ReceiptSubmitter {
-//	// Loop backwards through the middleware invoking each one. Replace the
-//	// fetcher with the new wrapped fetcher. Looping backwards ensures that the
-//	// first middleware of the slice is the first to be executed by requests.
-//	for i := len(mw) - 1; i >= 0; i-- {
-//		u := mw[i]
-//		if u != nil {
-//			uploader = u(uploader)
-//		}
-//	}
-//
-//	return uploader
-//}
-
 func submitReceipt(ctx context.Context, client *http.Client, requestURL string, headers *RequestHeaders,
 	privateKey *rsa.PrivateKey, rct *ReceiptRequest,
 ) (*Response, error) {
@@ -290,10 +276,7 @@ func processItems(items []Item) *itemProcessResponse {
 		TOTALTAXEXCLUSIVE += NETAMOUNT
 		TOTALTAXINCLUSIVE += itemAmount
 		TAXAMOUNT := ValueAddedTaxAmount(item.TaxCode, itemAmount)
-
-		vat := ParseTaxCode(item.TaxCode)
-		vatID := vat.ID
-
+		vatID := ParseTaxCode(item.TaxCode).ID
 		// check if the tax code is already in the map if not add it
 		if _, ok := vatTotals[vatID]; !ok {
 			vatTotals[vatID] = &vatTotal{
