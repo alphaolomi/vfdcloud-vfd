@@ -131,3 +131,22 @@ type (
 			privateKey *rsa.PrivateKey, report *ReportRequest) (*Response, error)
 	}
 )
+
+// ParsePaymentType parses the integer value of the payment type and returns the
+// corresponding PaymentType. Default is CASH.
+func ParsePaymentType(paymentType int) PaymentType {
+	switch paymentType {
+	case 1:
+		return CashPaymentType
+	case 2:
+		return ChequePaymentType
+	case 3:
+		return CreditCardPaymentType
+	case 4:
+		return ElectronicPaymentType
+	case 5:
+		return InvoicePaymentType
+	default:
+		return CashPaymentType
+	}
+}
