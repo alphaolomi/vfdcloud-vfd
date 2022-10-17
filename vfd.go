@@ -3,6 +3,7 @@ package vfd
 import (
 	"context"
 	"crypto/rsa"
+	"strings"
 )
 
 const (
@@ -132,20 +133,44 @@ type (
 	}
 )
 
-// ParsePaymentType parses the integer value of the payment type and returns the
-// corresponding PaymentType. Default is CASH.
-func ParsePaymentType(paymentType int) PaymentType {
-	switch paymentType {
-	case 1:
-		return CashPaymentType
-	case 2:
-		return ChequePaymentType
-	case 3:
-		return CreditCardPaymentType
-	case 4:
-		return ElectronicPaymentType
-	case 5:
-		return InvoicePaymentType
+// ParsePayment ...
+func ParsePayment(value any) PaymentType {
+	// heck if int or string
+	switch i := value.(type) {
+	case int, int64:
+		valueInt := i.(int)
+		switch valueInt {
+		case 1:
+			return CashPaymentType
+		case 2:
+			return ChequePaymentType
+		case 3:
+			return CreditCardPaymentType
+		case 4:
+			return ElectronicPaymentType
+		case 5:
+			return InvoicePaymentType
+		default:
+			return CashPaymentType
+		}
+
+	case string:
+		valueString := strings.ToUpper(i)
+		switch valueString {
+		case "CASH":
+			return CashPaymentType
+		case "CHEQUE":
+			return ChequePaymentType
+		case "CCARD":
+			return CreditCardPaymentType
+		case "EMONEY":
+			return ElectronicPaymentType
+		case "INVOICE":
+			return InvoicePaymentType
+		default:
+			return CashPaymentType
+		}
+
 	default:
 		return CashPaymentType
 	}

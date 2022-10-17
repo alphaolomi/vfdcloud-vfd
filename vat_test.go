@@ -1,8 +1,9 @@
 package vfd_test
 
 import (
-	"github.com/vfdcloud/vfd"
 	"testing"
+
+	"github.com/vfdcloud/vfd"
 )
 
 func TestNetAmountAndTaxAmount(t *testing.T) {

@@ -58,11 +58,6 @@ type (
 		Items    []Item
 		Payments []Payment
 	}
-	//// ReceiptSubmitter uploads receipts to the VFD server
-	//ReceiptSubmitter func(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
-	//	receipt *ReceiptRequest) (*Response, error)
-	//
-	//ReceiptSubmitMiddleware func(next ReceiptSubmitter) ReceiptSubmitter
 )
 
 // SubmitReceipt uploads a receipt to the VFD server.
