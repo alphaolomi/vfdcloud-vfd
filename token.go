@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	xhttp "github.com/vfdcloud/vfd/internal/http"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+
+	xhttp "github.com/vfdcloud/vfd/internal/http"
 )
 
 // ErrFetchToken is the error returned when the token request fails.

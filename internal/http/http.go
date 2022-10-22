@@ -16,7 +16,7 @@ func Instance() *http.Client {
 	return instance
 }
 
-func defaultInstance() *http.Client{
+func defaultInstance() *http.Client {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.MaxIdleConns = 100
 	t.MaxConnsPerHost = 100

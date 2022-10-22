@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	xhttp "github.com/vfdcloud/vfd/internal/http"
 	"io"
 	"net/http"
 	"os"
+
+	xhttp "github.com/vfdcloud/vfd/internal/http"
 
 	"github.com/vfdcloud/base"
 	"github.com/vfdcloud/vfd/internal/models"

@@ -7,11 +7,12 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	xhttp "github.com/vfdcloud/vfd/internal/http"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	xhttp "github.com/vfdcloud/vfd/internal/http"
 
 	"github.com/vfdcloud/base"
 	"github.com/vfdcloud/vfd/internal/models"
