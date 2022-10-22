@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"encoding/xml"
 	"fmt"
+	xhttp "github.com/vfdcloud/vfd/internal/http"
 	"io"
 	"net/http"
 	"regexp"
@@ -128,7 +129,7 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 func SubmitReport(ctx context.Context, url string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	report *ReportRequest,
 ) (*Response, error) {
-	client := clientInstance().INSTANCE
+	client := xhttp.Instance()
 	return submitReport(ctx, client, url, headers, privateKey, report)
 }
 

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	xhttp "github.com/vfdcloud/vfd/internal/http"
 	"io"
 	"net/http"
 	"net/url"
@@ -45,7 +46,7 @@ type (
 // work if called before the token expires.
 // It is a context-aware function with a timeout of 1 minute
 func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
-	httpClient := clientInstance().INSTANCE
+	httpClient := xhttp.Instance()
 
 	return fetchToken(ctx, httpClient, url, request)
 }

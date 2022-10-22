@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	xhttp "github.com/vfdcloud/vfd/internal/http"
 	"io"
 	"net/http"
 	"os"
@@ -64,7 +65,7 @@ type (
 func SubmitReceipt(ctx context.Context, requestURL string, headers *RequestHeaders, privateKey *rsa.PrivateKey,
 	receiptRequest *ReceiptRequest,
 ) (*Response, error) {
-	client := clientInstance().INSTANCE
+	client := xhttp.Instance()
 	return submitReceipt(ctx, client, requestURL, headers, privateKey, receiptRequest)
 }
 

@@ -23,9 +23,7 @@ type (
 	PayloadSigner func(privateKey *rsa.PrivateKey, payload []byte) ([]byte, error)
 )
 
-func LoadCert(certPath string, certPassword string) (
-	*rsa.PrivateKey, *x509.Certificate, error,
-) {
+func LoadCert(certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, error) {
 	return crypto.ParsePfxCertificate(certPath, certPassword)
 }
 

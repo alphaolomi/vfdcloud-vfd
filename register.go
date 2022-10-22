@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 
+	xhttp "github.com/vfdcloud/vfd/internal/http"
 	"github.com/vfdcloud/vfd/internal/models"
 )
 
@@ -96,7 +97,7 @@ func responseFormat(response *models.REGDATARESP) *RegistrationResponse {
 func Register(ctx context.Context, requestURL string, privateKey *rsa.PrivateKey,
 	request *RegistrationRequest,
 ) (*RegistrationResponse, error) {
-	client := clientInstance().INSTANCE
+	client := xhttp.Instance()
 	return register(ctx, client, requestURL, privateKey, request)
 }
 
