@@ -16,6 +16,9 @@ import (
 )
 
 type (
+
+	// RawRequest contains information needed to send receipt/z report file
+	// to the vfd server.
 	RawRequest struct {
 		Env      base.Env
 		Action   Action
