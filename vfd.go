@@ -3,8 +3,9 @@ package vfd
 import (
 	"context"
 	"crypto/rsa"
-	"github.com/vfdcloud/base"
 	"strings"
+
+	"github.com/vfdcloud/base"
 )
 
 const (

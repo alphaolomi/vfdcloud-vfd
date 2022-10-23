@@ -9,9 +9,8 @@ import (
 	"net/http"
 	"os"
 
-	xhttp "github.com/vfdcloud/vfd/internal/http"
-
 	"github.com/vfdcloud/base"
+	vhttp "github.com/vfdcloud/vfd/internal/http"
 	"github.com/vfdcloud/vfd/internal/models"
 )
 
@@ -30,7 +29,7 @@ type (
 // content of the file is read and submitted to the server as is.
 func SubmitRawRequest(ctx context.Context, headers *RequestHeaders, raw *RawRequest) (*Response, error) {
 	var (
-		client      = xhttp.Instance()
+		client      = vhttp.Instance()
 		certSerial  = headers.CertSerial
 		bearerToken = headers.BearerToken
 		reqURL      = RequestURL(raw.Env, raw.Action)
@@ -113,13 +112,11 @@ func SubmitRawRequest(ctx context.Context, headers *RequestHeaders, raw *RawRequ
 	}
 
 	if raw.Action == SubmitReceiptAction {
-
 		response := models.RCTACKEFDMS{}
 		err = xml.NewDecoder(bytes.NewBuffer(out)).Decode(&response)
 		if err != nil {
 			return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
 		}
-
 		return &Response{
 			Number:  response.RCTACK.RCTNUM,
 			Date:    response.RCTACK.DATE,
@@ -127,7 +124,6 @@ func SubmitRawRequest(ctx context.Context, headers *RequestHeaders, raw *RawRequ
 			Code:    response.RCTACK.ACKCODE,
 			Message: response.RCTACK.ACKMSG,
 		}, nil
-
 	}
 
 	return nil, fmt.Errorf("couldnt figure out the action")
