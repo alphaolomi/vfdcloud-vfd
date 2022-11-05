@@ -3,12 +3,13 @@ package test
 import (
 	"context"
 	"crypto/rsa"
-	"github.com/vfdcloud/base"
-	"github.com/vfdcloud/vfd"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/vfdcloud/base"
+	"github.com/vfdcloud/vfd"
 )
 
 //	RegisterProductionURL                  = "https://vfd.tra.go.tz/api/vfdRegReq"
@@ -84,22 +85,22 @@ func NewTestServer(t *testing.T, env base.Env, action vfd.Action) (*TestServer, 
 }
 
 func (t *TestServer) Register(ctx context.Context, url string, privateKey *rsa.PrivateKey, request *vfd.RegistrationRequest) (*vfd.RegistrationResponse, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (t *TestServer) FetchToken(ctx context.Context, url string, request *vfd.TokenRequest) (*vfd.TokenResponse, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (t *TestServer) SubmitReceipt(ctx context.Context, url string, headers *vfd.RequestHeaders, privateKey *rsa.PrivateKey, receipt *vfd.ReceiptRequest) (*vfd.Response, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (t *TestServer) SubmitReport(ctx context.Context, url string, headers *vfd.RequestHeaders, privateKey *rsa.PrivateKey, report *vfd.ReportRequest) (*vfd.Response, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
