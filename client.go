@@ -28,8 +28,7 @@ func NewClient(options ...Option) *Client {
 	}
 
 	for _, option := range options {
-		opt := option
-		opt(client)
+		option(client)
 	}
 
 	return client
