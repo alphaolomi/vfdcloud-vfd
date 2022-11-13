@@ -26,11 +26,9 @@ func NewClient(options ...Option) *Client {
 	client := &Client{
 		http: xhttp.Instance(),
 	}
-
 	for _, option := range options {
 		option(client)
 	}
-
 	return client
 }
 

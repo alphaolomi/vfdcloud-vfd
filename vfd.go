@@ -40,6 +40,7 @@ const (
 	SubmitReportRoutingKey     string      = "vfdzreport"
 	ContentTypeXML             string      = "application/xml"
 	RegistrationRequestClient  string      = "webapi"
+	SuccessCode                int64       = 0
 )
 
 type (
@@ -134,6 +135,12 @@ type (
 			privateKey *rsa.PrivateKey, report *ReportRequest) (*Response, error)
 	}
 )
+
+// IsSuccess checks the response ack code and return true if the code
+// means success and false if otherwise
+func IsSuccess(code int64) bool {
+	return code == SuccessCode
+}
 
 // ParsePayment ...
 func ParsePayment(value any) PaymentType {

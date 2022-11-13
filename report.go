@@ -154,23 +154,25 @@ func generateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 	)
 
 	payments1 := make([]*models.PAYMENT, len(payments))
-	for _, p := range payments {
-		payments1 = append(payments1, &models.PAYMENT{
+	for i, p := range payments {
+		i, p := i, p
+		payments1[i] = &models.PAYMENT{
 			PMTTYPE:   string(p.Type),
 			PMTAMOUNT: fmt.Sprintf("%.2f", p.Amount),
-		})
+		}
 	}
 
 	PAYMENTS := models.PAYMENTS{PAYMENT: payments1}
 
 	vats1 := make([]*models.VATTOTAL, len(vats))
-	for _, v := range vats {
+	for i, v := range vats {
+		i, v := i, v
 		rate := fmt.Sprintf("%s-%.2f", v.ID, v.Rate)
-		vats1 = append(vats1, &models.VATTOTAL{
+		vats1[i] = &models.VATTOTAL{
 			VATRATE:    rate,
 			NETTAMOUNT: fmt.Sprintf("%.2f", v.NetAmount),
 			TAXAMOUNT:  fmt.Sprintf("%.2f", v.TaxAmount),
-		})
+		}
 	}
 
 	VATTOTALS := models.VATTOTALS{VATTOTAL: vats1}

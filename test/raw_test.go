@@ -99,7 +99,10 @@ func (t *TestServer) SubmitReceipt(ctx context.Context, url string, headers *vfd
 	panic("implement me")
 }
 
-func (t *TestServer) SubmitReport(ctx context.Context, url string, headers *vfd.RequestHeaders, privateKey *rsa.PrivateKey, report *vfd.ReportRequest) (*vfd.Response, error) {
+func (t *TestServer) SubmitReport(
+	ctx context.Context, url string, headers *vfd.RequestHeaders,
+	privateKey *rsa.PrivateKey, report *vfd.ReportRequest,
+) (*vfd.Response, error) {
 	// TODO implement me
 	panic("implement me")
 }
