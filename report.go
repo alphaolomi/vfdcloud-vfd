@@ -45,6 +45,7 @@ type (
 		Time             string
 		VRN              string
 		TIN              string
+		UIN              string
 		TaxOffice        string
 		RegistrationID   string
 		ZNumber          string
@@ -206,7 +207,7 @@ func generateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 		ZNUMBER:          params.ZNumber,
 		EFDSERIAL:        params.EFDSerial,
 		REGISTRATIONDATE: params.RegistrationDate,
-		USER:             "",
+		USER:             params.UIN,
 		SIMIMSI:          SIMIMSI,
 		TOTALS:           TT,
 		VATTOTALS:        VATTOTALS,
