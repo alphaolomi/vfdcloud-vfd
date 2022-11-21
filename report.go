@@ -144,6 +144,107 @@ func (lines *Address) AsList() []string {
 	}
 }
 
+// sumVatTotals
+func sumVatTotals(vats []VATTOTAL) models.VATTOTALS {
+	vatTotalMap := map[string]struct {
+		NetAmount float64
+		TaxAmount float64
+	}{
+		"A-18.00": {0, 0},
+		"B-0.00":  {0, 0},
+		"C-0.00":  {0, 0},
+		"D-0.00":  {0, 0},
+		"E-0.00":  {0, 0},
+	}
+
+	for _, vat := range vats {
+		rate := fmt.Sprintf("%s-%.2f", vat.ID, vat.Rate)
+		vatTotalMap[rate] = struct {
+			NetAmount float64
+			TaxAmount float64
+		}{
+			vatTotalMap[rate].NetAmount + vat.NetAmount,
+			vatTotalMap[rate].TaxAmount + vat.TaxAmount,
+		}
+	}
+
+	return models.VATTOTALS{
+		VATTOTAL: []*models.VATTOTAL{
+			{
+				VATRATE:    "A-18.00",
+				NETTAMOUNT: fmt.Sprintf("%.2f", vatTotalMap["A-18.00"].NetAmount),
+				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["A-18.00"].TaxAmount),
+			},
+			{
+				VATRATE:    "B-10.00",
+				NETTAMOUNT: fmt.Sprintf("%.2f", vatTotalMap["B-10.00"].NetAmount),
+				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["B-10.00"].TaxAmount),
+			},
+			{
+				VATRATE:    "C-0.00",
+				NETTAMOUNT: fmt.Sprintf("%.2f", vatTotalMap["C-0.00"].NetAmount),
+				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["C-0.00"].TaxAmount),
+			},
+			{
+				VATRATE:    "D-0.00",
+				NETTAMOUNT: fmt.Sprintf("%.2f", vatTotalMap["D-0.00"].NetAmount),
+				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["D-0.00"].TaxAmount),
+			},
+			{
+				VATRATE:    "E-0.00",
+				NETTAMOUNT: fmt.Sprintf("%.2f", vatTotalMap["E-0.00"].NetAmount),
+				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["E-0.00"].TaxAmount),
+			},
+		},
+	}
+}
+
+// sumPayments sums all payments
+func sumPayments(payments []Payment) models.PAYMENTS {
+	paymentMap := map[string]float64{
+		"CASH":    0.0,
+		"CHEQUE":  0.0,
+		"CCARD":   0.0,
+		"EMONEY":  0.0,
+		"INVOICE": 0.0,
+	}
+
+	for _, p := range payments {
+		pType := string(p.Type)
+		paymentMap[pType] += p.Amount
+	}
+
+	// paymentList contains a list of payments and the order
+	// should be the same as in the paymentMap
+	paymentsList := make([]*models.PAYMENT, 5)
+	paymentsList[0] = &models.PAYMENT{
+		PMTTYPE:   "CASH",
+		PMTAMOUNT: fmt.Sprintf("%.2f", paymentMap["CASH"]),
+	}
+	paymentsList[1] = &models.PAYMENT{
+		PMTTYPE:   "CHEQUE",
+		PMTAMOUNT: fmt.Sprintf("%.2f", paymentMap["CHEQUE"]),
+	}
+	paymentsList[2] = &models.PAYMENT{
+		PMTTYPE:   "CCARD",
+		PMTAMOUNT: fmt.Sprintf("%.2f", paymentMap["CCARD"]),
+	}
+
+	paymentsList[3] = &models.PAYMENT{
+		PMTTYPE:   "EMONEY",
+		PMTAMOUNT: fmt.Sprintf("%.2f", paymentMap["EMONEY"]),
+	}
+
+	paymentsList[4] = &models.PAYMENT{
+		PMTTYPE:   "INVOICE",
+		PMTAMOUNT: fmt.Sprintf("%.2f", paymentMap["INVOICE"]),
+	}
+
+	return models.PAYMENTS{
+		PAYMENT: paymentsList,
+	}
+}
+
 func generateZReport(params *ReportParams, address Address, vats []VATTOTAL, payments []Payment, totals ReportTotals) *models.ZREPORT {
 	const (
 		SIMIMSI       = "WEBAPI"
@@ -154,29 +255,8 @@ func generateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 		ERRORS        = ""
 	)
 
-	payments1 := make([]*models.PAYMENT, len(payments))
-	for i, p := range payments {
-		i, p := i, p
-		payments1[i] = &models.PAYMENT{
-			PMTTYPE:   string(p.Type),
-			PMTAMOUNT: fmt.Sprintf("%.2f", p.Amount),
-		}
-	}
-
-	PAYMENTS := models.PAYMENTS{PAYMENT: payments1}
-
-	vats1 := make([]*models.VATTOTAL, len(vats))
-	for i, v := range vats {
-		i, v := i, v
-		rate := fmt.Sprintf("%s-%.2f", v.ID, v.Rate)
-		vats1[i] = &models.VATTOTAL{
-			VATRATE:    rate,
-			NETTAMOUNT: fmt.Sprintf("%.2f", v.NetAmount),
-			TAXAMOUNT:  fmt.Sprintf("%.2f", v.TaxAmount),
-		}
-	}
-
-	VATTOTALS := models.VATTOTALS{VATTOTAL: vats1}
+	PAYMENTS := sumPayments(payments)
+	VATTOTALS := sumVatTotals(vats)
 
 	TT := models.REPORTTOTALS{
 		DAILYTOTALAMOUNT: totals.DailyTotalAmount,

@@ -10,7 +10,7 @@ const (
 	StandardVATRATE      = 18.00
 	StandardVATCODE      = 1
 	SpecialVATID         = "B"
-	SpecialVATRATE       = 10.00
+	SpecialVATRATE       = 0.00
 	SpecialVATCODE       = 2
 	ZeroVATID            = "C"
 	ZeroVATRATE          = 0.00
