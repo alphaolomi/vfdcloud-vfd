@@ -176,9 +176,9 @@ func sumVatTotals(vats []VATTOTAL) models.VATTOTALS {
 				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["A-18.00"].TaxAmount),
 			},
 			{
-				VATRATE:    "B-10.00",
-				NETTAMOUNT: fmt.Sprintf("%.2f", vatTotalMap["B-10.00"].NetAmount),
-				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["B-10.00"].TaxAmount),
+				VATRATE:    "B-0.00",
+				NETTAMOUNT: fmt.Sprintf("%.2f", vatTotalMap["B-0.00"].NetAmount),
+				TAXAMOUNT:  fmt.Sprintf("%.2f", vatTotalMap["B-0.00"].TaxAmount),
 			},
 			{
 				VATRATE:    "C-0.00",
