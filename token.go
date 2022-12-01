@@ -111,7 +111,7 @@ func fetchToken(ctx context.Context, client *http.Client, path string, request *
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("INSTANCE call error: %w: %v", ErrFetchToken, err)
+		return nil, fmt.Errorf("http call error: %w: %v", ErrFetchToken, err)
 	}
 	defer resp.Body.Close()
 

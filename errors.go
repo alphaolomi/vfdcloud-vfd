@@ -9,6 +9,18 @@ package vfd
 // 6		Invalid Serial or Serial not Registered to Web API/TIN	CERTKEY is not registered to TIN sending registration request. Use only TIN and CERTKEY provided by TRA
 // 7	FAIL	Invalid client header	Wrong client value specified
 // 8	FAIL	Wrong Certificate used to Register Web API	Wrong certificate used
+
+const (
+	SuccessCode          int64 = 0
+	InvalidSignatureCode int64 = 1
+	InvalidTaxID         int64 = 3
+	ApprovalRequired     int64 = 4
+	UnhandledException   int64 = 5
+	InvalidSerial        int64 = 6
+	InvalidClientHeader  int64 = 7
+	InvalidCertificate   int64 = 8
+)
+
 type Error struct {
 	Code    int64  `json:"code,omitempty"`
 	Message string `json:"message,omitempty"`

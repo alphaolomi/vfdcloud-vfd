@@ -40,7 +40,6 @@ const (
 	SubmitReportRoutingKey     string      = "vfdzreport"
 	ContentTypeXML             string      = "application/xml"
 	RegistrationRequestClient  string      = "webapi"
-	SuccessCode                int64       = 0
 )
 
 type (
