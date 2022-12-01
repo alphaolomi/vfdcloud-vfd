@@ -38,7 +38,41 @@ type (
 		ExpiresIn   int64  `json:"expires_in,omitempty"`
 		Error       string `json:"error,omitempty"`
 	}
+
+	// OnTokenResponse is a callback function that is called when a token is received.
+	OnTokenResponse func(context.Context, *TokenResponse) error
+
+	// TokenResponseMiddleware is a middleware function that is called when a token is received.
+	TokenResponseMiddleware func(next OnTokenResponse) OnTokenResponse
 )
+
+// WrapTokenResponseMiddleware wraps a TokenResponseMiddleware with a OnTokenResponse.
+func WrapTokenResponseMiddleware(next OnTokenResponse, middlewares ...TokenResponseMiddleware) OnTokenResponse {
+	// loop backwards through the middlewares
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		next = middlewares[i](next)
+	}
+	return next
+}
+
+// FetchTokenWithMw retrieves a token from the VFD server then passes it to the callback function
+// This is beacuse the response might have a code and message that needs to be handled.
+func FetchTokenWithMw(ctx context.Context, url string, request *TokenRequest, callback OnTokenResponse) (*TokenResponse, error) {
+	httpClient := xhttp.Instance()
+
+	response, err := fetchToken(ctx, httpClient, url, request)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback(ctx, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+
+}
 
 // FetchToken retrieves a token from the VFD server. If the status code is not 200, an error is
 // returned. Error Message will contain TokenResponse.Code and TokenResponse.Message

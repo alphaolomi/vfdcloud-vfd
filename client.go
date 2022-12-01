@@ -50,6 +50,22 @@ func (c *Client) FetchToken(ctx context.Context, url string,
 	return fetchToken(ctx, c.http, url, request)
 }
 
+func (c *Client) FetchTokenWithMw(ctx context.Context, url string,
+	request *TokenRequest, callback OnTokenResponse,
+) (*TokenResponse, error) {
+	response, err := fetchToken(ctx, c.http, url, request)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback(ctx, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
 func (c *Client) SubmitReceipt(
 	ctx context.Context,
 	url string,
