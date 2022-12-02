@@ -71,7 +71,6 @@ func FetchTokenWithMw(ctx context.Context, url string, request *TokenRequest, ca
 	}
 
 	return response, nil
-
 }
 
 // FetchToken retrieves a token from the VFD server. If the status code is not 200, an error is

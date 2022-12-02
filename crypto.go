@@ -6,8 +6,10 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
+	"os"
 
 	"github.com/vfdcloud/base/crypto"
+	"software.sslmate.com/src/go-pkcs12"
 )
 
 type (
@@ -23,8 +25,49 @@ type (
 	PayloadSigner func(privateKey *rsa.PrivateKey, payload []byte) ([]byte, error)
 )
 
-func LoadCert(certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, error) {
-	return crypto.ParsePfxCertificate(certPath, certPassword)
+func LoadCertChain(certPath string, certPassword string) (*rsa.PrivateKey, *x509.Certificate, []*x509.Certificate, error) {
+	pfxData, err := os.ReadFile(certPath)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("could not read the certificate file: %w", err)
+	}
+	pfx, cert, caCerts, err := pkcs12.DecodeChain(pfxData, certPassword)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("could not decode the certificate file: %w", err)
+	}
+
+	// type check to make sure we have a private key
+	privateKey, ok := pfx.(*rsa.PrivateKey)
+	if !ok {
+		return nil, nil, nil, fmt.Errorf("private key is not of type *rsa.PrivateKey: %w", err)
+	}
+
+	return privateKey, cert, caCerts, nil
+}
+
+func LoadCert(path, password string) (*rsa.PrivateKey, *x509.Certificate, error) {
+	pfxData, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	pfx, cert, err := pkcs12.Decode(pfxData, password)
+	if err != nil {
+		if err.Error() == "pkcs12: expected exactly two safe bags in the PFX PDU" {
+			privateKey, cert, _, err := LoadCertChain(path, password)
+			if err != nil {
+				return nil, nil, err
+			}
+			return privateKey, cert, nil
+		}
+		return nil, nil, err
+	}
+
+	// type check to make sure we have a private key
+	privateKey, ok := pfx.(*rsa.PrivateKey)
+	if !ok {
+		return nil, nil, fmt.Errorf("private key is not of type rsa.PrivateKey")
+	}
+
+	return privateKey, cert, nil
 }
 
 func Sign(privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {

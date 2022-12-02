@@ -305,7 +305,7 @@ func generateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 		FWCHECKSUM: FWCHECKSUM,
 	}
 
-	//report.RoundOff()
+	// report.RoundOff()
 
 	return report
 }
