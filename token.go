@@ -81,7 +81,6 @@ func FetchTokenWithMw(ctx context.Context, url string, request *TokenRequest, ca
 // It is a context-aware function with a timeout of 1 minute
 func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
 	httpClient := xhttp.Instance()
-
 	return fetchToken(ctx, httpClient, url, request)
 }
 
