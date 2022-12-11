@@ -15,7 +15,8 @@ jobs:
         go-version: [ '1.17', '1.18', '1.19' ]
     env:
       GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
-      GOPRIVATE: github.com/vfdcloud/*
+      GOPRIVATE: github.com/vfdcloud/base
+      GO111MODULE: on
     steps:
       - uses: actions/checkout@v3
       - name: set up git
