@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/rsa"
 	"net/http"
-
-	xhttp "github.com/vfdcloud/vfd/internal/http"
 )
 
 type (
@@ -24,7 +22,7 @@ func WithHttpClient(http *http.Client) Option {
 
 func NewClient(options ...Option) *Client {
 	client := &Client{
-		http: xhttp.Instance(),
+		http: http.DefaultClient,
 	}
 	for _, option := range options {
 		option(client)
