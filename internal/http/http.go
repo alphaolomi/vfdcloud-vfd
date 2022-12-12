@@ -19,6 +19,7 @@ func Instance() *http.Client {
 func defaultInstance() *http.Client {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.MaxIdleConns = 100
+	t.ForceAttemptHTTP2 = false
 	t.MaxConnsPerHost = 100
 	t.MaxIdleConnsPerHost = 100
 	httpClient := &http.Client{

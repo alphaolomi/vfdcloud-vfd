@@ -8,7 +8,7 @@ import (
 )
 
 // ACKCODE	STATUS	DESCRIPTION	POSSIBLE REASON
-// 0	SUCCESS	Success
+// 0	    SUCCESS	Success
 // 1	FAIL	Invalid Signature	Signature generated not in correct format. Signature generated with missing nodes, signature generated with empty lines in XML or
 // 3	FAIL	Invalid TIN	TIN specified with dash or wrong TIN specified
 // 4	FAIL	VFD Registration Approval required	Request posted without Client details, which is WEBAPI.
