@@ -94,7 +94,7 @@ func submitReport(ctx context.Context, client *http.Client, requestURL string, h
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%v : %w", ErrReportSubmitFailed, err)
+		return nil, checkNetworkError(newContext, "submit report", err)
 	}
 	defer resp.Body.Close()
 

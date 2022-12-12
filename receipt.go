@@ -100,7 +100,7 @@ func submitReceipt(ctx context.Context, client *http.Client, requestURL string, 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
+		return nil, checkNetworkError(newContext, "receipt upload", err)
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

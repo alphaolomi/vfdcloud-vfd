@@ -86,7 +86,7 @@ func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenR
 
 // fetchToken retrieves a token from the VFD server. If the status code is not 200, an error is returned.
 // It is a context-aware function with a timeout of 1 minute
-func fetchToken(ctx context.Context, client *http.Client, path string, request *TokenRequest) (*TokenResponse, error) {
+func fetchToken(ctx2 context.Context, client *http.Client, path string, request *TokenRequest) (*TokenResponse, error) {
 	var (
 		username  = request.Username
 		password  = request.Password
@@ -94,14 +94,14 @@ func fetchToken(ctx context.Context, client *http.Client, path string, request *
 	)
 
 	// this request should have a max of 1 Minute timeout
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+	ctx2, cancel := context.WithTimeout(ctx2, 1*time.Minute)
 	defer cancel()
 	form := url.Values{}
 	form.Set("username", username)
 	form.Set("password", password)
 	form.Set("grant_type", grantType)
 	buffer := bytes.NewBufferString(form.Encode())
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, buffer)
+	req, err := http.NewRequestWithContext(ctx2, http.MethodPost, path, buffer)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", ErrFetchToken, err)
 	}
@@ -109,7 +109,7 @@ func fetchToken(ctx context.Context, client *http.Client, path string, request *
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http call error: %w: %v", ErrFetchToken, err)
+		return nil, checkNetworkError(ctx2, "fetch token", err)
 	}
 	defer resp.Body.Close()
 

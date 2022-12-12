@@ -1,5 +1,12 @@
 package vfd
 
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net"
+)
+
 // ACKCODE	STATUS	DESCRIPTION	POSSIBLE REASON
 // 0	SUCCESS	Success
 // 1	FAIL	Invalid Signature	Signature generated not in correct format. Signature generated with missing nodes, signature generated with empty lines in XML or
@@ -21,9 +28,26 @@ const (
 	InvalidCertificate   int64 = 8
 )
 
-type Error struct {
-	Code    int64  `json:"code,omitempty"`
-	Message string `json:"message,omitempty"`
+type (
+	Error struct {
+		Code    int64  `json:"code,omitempty"`
+		Message string `json:"message,omitempty"`
+	}
+
+	//NetworkError is returned when there is an error in the network.
+	NetworkError struct {
+		Err     error
+		Message string
+	}
+)
+
+func (e *NetworkError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Message, e.Err.Error())
+}
+
+// Unwrap returns the underlying error.
+func (e *NetworkError) Unwrap() error {
+	return e.Err
 }
 
 // ParseErrorCode parses the error code and returns the corresponding error message.
@@ -48,4 +72,35 @@ func ParseErrorCode(code int64) string {
 	default:
 		return "Unknown error"
 	}
+}
+
+// IsNetworkError returns true if the error is a NetworkError.
+func IsNetworkError(err error) bool {
+	netErr := &NetworkError{}
+	return errors.As(err, &netErr)
+}
+
+// checkNetworkError checks if the errors is about network and returns a NetworkError.
+// An errors is considered a network error if it is a net.Error, context.Canceled
+// or context.DeadlineExceeded. or just a context error.
+func checkNetworkError(ctx context.Context, prefix string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if ctx.Err() != nil || err == context.Canceled || err == context.DeadlineExceeded {
+		return &NetworkError{
+			Err:     ctx.Err(),
+			Message: fmt.Sprintf("%s: context error (canceled or deadline exceeded)", prefix),
+		}
+	}
+
+	if netErr, ok := err.(net.Error); ok {
+		return &NetworkError{
+			Err:     netErr,
+			Message: fmt.Sprintf("%s: network error", prefix),
+		}
+	}
+
+	return fmt.Errorf("%s: %w", prefix, err)
 }

@@ -71,7 +71,7 @@ func SubmitRawRequest(ctx context.Context, headers *RequestHeaders, raw *RawRequ
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%v : %w", ErrReceiptUploadFailed, err)
+		return nil, checkNetworkError(newContext, "raw request submit", err)
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
