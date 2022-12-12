@@ -34,7 +34,7 @@ type (
 		Message string `json:"message,omitempty"`
 	}
 
-	//NetworkError is returned when there is an error in the network.
+	// NetworkError is returned when there is an error in the network.
 	NetworkError struct {
 		Err     error
 		Message string
