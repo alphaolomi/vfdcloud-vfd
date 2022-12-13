@@ -20,6 +20,13 @@ func WithHttpClient(http *http.Client) Option {
 	}
 }
 
+// SetHttpClient sets the http client
+func (c *Client) SetHttpClient(http *http.Client) {
+	if http != nil {
+		c.http = http
+	}
+}
+
 func NewClient(options ...Option) *Client {
 	client := &Client{
 		http: http.DefaultClient,
