@@ -311,7 +311,7 @@ func generateZReport(params *ReportParams, address Address, vats []VATTOTAL, pay
 }
 
 // ReportBytes returns the bytes of the report payload. It calls xml.Marshal on the report.
-// then replace all the occurrences of <PAYMENT>, </PAYMENT>, <VATTOTAL>, </VATTOTAL> with empty string ""
+// then replace all the occurrences of <PAYMENT>, </PAYMENT>, <VAT>, </VAT> with empty string ""
 // and then add the xml.Header to the beginning of the payload.
 func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Address,
 	vats []VATTOTAL, payments []Payment,
@@ -335,7 +335,7 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 }
 
 func formatReportXmlPayload(payload []byte, totals ReportTotals, vats []VATTOTAL, payments []Payment) string {
-	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}
+	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VAT>", "", "</VAT>", ""}
 	replacer := strings.NewReplacer(replaceList...)
 	payloadString := replacer.Replace(string(payload))
 

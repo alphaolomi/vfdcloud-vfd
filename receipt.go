@@ -148,7 +148,7 @@ func generateReceipt(params ReceiptParams, customer Customer, items []Item, paym
 		}
 	}
 
-	RESULTS := processItems(items)
+	RESULTS := ProcessItems(items)
 	ITEMS := models.ITEMS{ITEM: RESULTS.ITEMS}
 	TOTALS := RESULTS.TOTALS
 	VATTOTALS := models.VATTOTALS{VATTOTAL: RESULTS.VATTOTALS}
@@ -192,8 +192,8 @@ func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Cus
 	replacer := strings.NewReplacer(
 		"<PAYMENT>", "",
 		"</PAYMENT>", "",
-		"<VATTOTAL>", "",
-		"</VATTOTAL>", "")
+		"<VAT>", "",
+		"</VAT>", "")
 
 	receiptBytes = []byte(replacer.Replace(string(receiptBytes)))
 	signedReceipt, err := Sign(privateKey, receiptBytes)
@@ -232,7 +232,7 @@ func receiptLink(baseURL string, receiptCode string, gc int64, receiptTime strin
 }
 
 type (
-	itemProcessResponse struct {
+	ItemProcessResponse struct {
 		ITEMS     []*models.ITEM
 		VATTOTALS []*models.VATTOTAL
 		TOTALS    models.TOTALS
@@ -245,10 +245,10 @@ type (
 	}
 )
 
-// processItems processes the []Items in the submitted receipt request
+// ProcessItems processes the []Items in the submitted receipt request
 // and create []*models.ITEM which is used to create the xml request also
 // calculates the total discount, total tax exclusive and total tax inclusive
-func processItems(items []Item) *itemProcessResponse {
+func ProcessItems(items []Item) *ItemProcessResponse {
 	var (
 		DISCOUNT          = 0.0
 		TOTALTAXEXCLUSIVE = 0.0
@@ -267,12 +267,20 @@ func processItems(items []Item) *itemProcessResponse {
 			TAXCODE: item.TaxCode,
 			AMT:     itemAmount,
 		}
-		DISCOUNT += item.Discount
+
+		// In case the item has a discount, the amount of tax should be calculated
+		// based on the discounted amount.
+		// NormalAmount = AmountWithoutTax + TaxAmount + DiscountAmount
+		// DiscountAmount = Discount * Quantity
+
+		itemDiscount := item.Discount * item.Quantity
+		itemAmountWithoutDiscount := itemAmount - itemDiscount
+		DISCOUNT += itemDiscount
 		ITEMS = append(ITEMS, itemXML)
-		NETAMOUNT := NetAmount(item.TaxCode, itemAmount)
+		NETAMOUNT := NetAmount(item.TaxCode, itemAmountWithoutDiscount)
 		TOTALTAXEXCLUSIVE += NETAMOUNT
-		TOTALTAXINCLUSIVE += itemAmount
-		TAXAMOUNT := ValueAddedTaxAmount(item.TaxCode, itemAmount)
+		TOTALTAXINCLUSIVE += itemAmountWithoutDiscount
+		TAXAMOUNT := ValueAddedTaxAmount(item.TaxCode, itemAmountWithoutDiscount)
 		vatID := ParseTaxCode(item.TaxCode).ID
 		// check if the tax code is already in the map if not add it
 		if _, ok := vatTotals[vatID]; !ok {
@@ -301,7 +309,7 @@ func processItems(items []Item) *itemProcessResponse {
 		TOTALTAXINCL: TOTALTAXINCLUSIVE,
 		DISCOUNT:     DISCOUNT,
 	}
-	return &itemProcessResponse{
+	return &ItemProcessResponse{
 		ITEMS:     ITEMS,
 		VATTOTALS: VATTOTALS,
 		TOTALS:    TOTALS,
