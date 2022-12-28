@@ -1,6 +1,8 @@
 package vfd
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"encoding/xml"
 	"fmt"
 	"reflect"
@@ -133,4 +135,57 @@ func TestProcessItems(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReceiptBytes(t *testing.T) {
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Errorf("Error generating private key: %v", err)
+	}
+	customer := Customer{
+		Type:   NIDACustomerID,
+		ID:     "516221638383907151",
+		Name:   "Pius Alfred",
+		Mobile: "255765992153",
+	}
+
+	items := []Item{
+		{
+			ID:          "1",
+			Description: "Item 1",
+			TaxCode:     TaxableItemCode,
+			Quantity:    5,
+			Price:       2000,
+			Discount:    1000,
+		},
+	}
+
+	payments := []Payment{
+		{
+			Type:   CashPaymentType,
+			Amount: 5000,
+		},
+	}
+
+	params := ReceiptParams{
+		Date:           "2022-11-17",
+		Time:           "14:00:00",
+		TIN:            "TQR6W5FWC",
+		RegistrationID: "262T3FSSS",
+		EFDSerial:      "SGSYSTHSSJ",
+		ReceiptNum:     "",
+		DailyCounter:   1,
+		GlobalCounter:  100,
+		ZNum:           "",
+		ReceiptVNum:    "",
+	}
+
+	got, err := ReceiptBytes(privateKey, params, customer, items, payments)
+
+	if err != nil {
+		t.Errorf("Error generating receipt bytes: %v", err)
+	}
+
+	t.Logf("Receipt bytes: \n\n%s\n\n", string(got))
 }
