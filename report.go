@@ -335,7 +335,7 @@ func ReportBytes(privateKey *rsa.PrivateKey, params *ReportParams, address Addre
 }
 
 func formatReportXmlPayload(payload []byte, totals ReportTotals, vats []VATTOTAL, payments []Payment) string {
-	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VAT>", "", "</VAT>", ""}
+	replaceList := []string{"<PAYMENT>", "", "</PAYMENT>", "", "<VATTOTAL>", "", "</VATTOTAL>", ""}
 	replacer := strings.NewReplacer(replaceList...)
 	payloadString := replacer.Replace(string(payload))
 

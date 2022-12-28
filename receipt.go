@@ -192,8 +192,8 @@ func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Cus
 	replacer := strings.NewReplacer(
 		"<PAYMENT>", "",
 		"</PAYMENT>", "",
-		"<VAT>", "",
-		"</VAT>", "")
+		"<VATTOTAL>", "",
+		"</VATTOTAL>", "")
 
 	receiptBytes = []byte(replacer.Replace(string(receiptBytes)))
 	signedReceipt, err := Sign(privateKey, receiptBytes)
