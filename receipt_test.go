@@ -3,9 +3,10 @@ package vfd
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/vfdcloud/vfd/internal/models"
 	"reflect"
 	"testing"
+
+	"github.com/vfdcloud/vfd/internal/models"
 )
 
 func TestProcessItems(t *testing.T) {
@@ -127,7 +128,6 @@ func TestProcessItems(t *testing.T) {
 						t.Logf("VATRATE[%s]: [GOT]: TAXAMOUNT: %s, NETTAMOUNT: %s [EXPECTED]: TAXAMOUNT: %s, NETTAMOUNT: %s ",
 							v.VATRATE, v.TAXAMOUNT, v.NETTAMOUNT, want[i].TAXAMOUNT, want[i].NETTAMOUNT)
 					}
-
 				}(got.VATTOTALS, tt.want.VAT)
 
 			}
