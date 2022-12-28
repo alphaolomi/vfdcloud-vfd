@@ -138,7 +138,6 @@ func TestProcessItems(t *testing.T) {
 }
 
 func TestReceiptBytes(t *testing.T) {
-
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		t.Errorf("Error generating private key: %v", err)
@@ -182,7 +181,6 @@ func TestReceiptBytes(t *testing.T) {
 	}
 
 	got, err := ReceiptBytes(privateKey, params, customer, items, payments)
-
 	if err != nil {
 		t.Errorf("Error generating receipt bytes: %v", err)
 	}
