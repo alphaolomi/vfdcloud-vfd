@@ -45,12 +45,13 @@ type (
 
 	// Item represent a purchased item. TaxCode is an integer that can take the
 	// value of 1 for taxable items and 3 for non-taxable items.
+	// Discount is for the whole package not a unit discount
 	Item struct {
 		ID          string
 		Description string
 		TaxCode     int64
 		Quantity    float64
-		Price       float64
+		UnitPrice   float64
 		Discount    float64
 	}
 
@@ -254,12 +255,15 @@ func ProcessItems(items []Item) *ItemProcessResponse {
 		TOTALTAXEXCLUSIVE = 0.0
 		TOTALTAXINCLUSIVE = 0.0
 	)
-	// initialize map that will store the tax code and total amount of tax collected
-	// over all items with the same tax code. The map keys are the tax codes.
+
+	// TotalPrice = UnitPrice * Quantity
+	// Amount = TotalPrice - Discount
+	// TaxableAmount + TaxableAmount * TaxRate = Amount
 	vatTotals := make(map[string]*vatTotal)
 	var ITEMS []*models.ITEM
 	for _, item := range items {
-		itemAmount := item.Quantity * item.Price
+		item := item
+		itemAmount := item.Quantity * item.UnitPrice
 		itemXML := &models.ITEM{
 			ID:      item.ID,
 			DESC:    item.Description,
@@ -267,15 +271,8 @@ func ProcessItems(items []Item) *ItemProcessResponse {
 			TAXCODE: item.TaxCode,
 			AMT:     itemAmount,
 		}
-
-		// In case the item has a discount, the amount of tax should be calculated
-		// based on the discounted amount.
-		// NormalAmount = AmountWithoutTax + TaxAmount + DiscountAmount
-		// DiscountAmount = Discount * Quantity
-
-		itemDiscount := item.Discount * item.Quantity
-		itemAmountWithoutDiscount := itemAmount - itemDiscount
-		DISCOUNT += itemDiscount
+		itemAmountWithoutDiscount := itemAmount - item.Discount
+		DISCOUNT += item.Discount
 		ITEMS = append(ITEMS, itemXML)
 		NETAMOUNT := NetAmount(item.TaxCode, itemAmountWithoutDiscount)
 		TOTALTAXEXCLUSIVE += NETAMOUNT
