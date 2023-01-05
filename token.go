@@ -39,6 +39,9 @@ type (
 		Error       string `json:"error,omitempty"`
 	}
 
+	// FetchTokenFunc is a function that fetches a token from the VFD server.
+	FetchTokenFunc func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error)
+
 	// OnTokenResponse is a callback function that is called when a token is received.
 	OnTokenResponse func(context.Context, *TokenResponse) error
 
