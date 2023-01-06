@@ -61,12 +61,12 @@ func NewTestServer(t *testing.T, envX env.Env, action vfd.Action) (*TestServer, 
 				t.Errorf("expected POST request, got %s", r.Method)
 			}
 			switch envX {
-			case env.ProdEnv:
+			case env.PROD:
 				if r.URL.Path != RegisterProductionEndpoint {
 					t.Errorf("expected %s request, got %s", RegisterProductionEndpoint, r.URL.Path)
 				}
 
-			case env.StagingEnv:
+			case env.STAGING:
 				if r.URL.Path != RegisterTestingEndpoint {
 					t.Errorf("expected %s request, got %s", RegisterTestingEndpoint, r.URL.Path)
 				}

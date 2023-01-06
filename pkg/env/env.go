@@ -1,10 +1,10 @@
 package env
 
 const (
-	DevEnv     Env = "development"
-	TestEnv    Env = "test"
-	StagingEnv Env = "staging"
-	ProdEnv    Env = "production"
+	DEV     Env = "development"
+	TEST    Env = "test"
+	STAGING Env = "staging"
+	PROD    Env = "production"
 )
 
 type Env string
@@ -13,17 +13,17 @@ func (e Env) String() string {
 	return string(e)
 }
 
-func ParseEnv(s string) Env {
+func Parse(s string) Env {
 	switch s {
 	case "development", "dev":
-		return DevEnv
+		return DEV
 	case "test", "testing":
-		return TestEnv
+		return TEST
 	case "staging":
-		return StagingEnv
+		return STAGING
 	case "production", "prod":
-		return ProdEnv
+		return PROD
 	default:
-		return DevEnv
+		return DEV
 	}
 }

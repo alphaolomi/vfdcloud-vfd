@@ -216,7 +216,7 @@ func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Cus
 func ReceiptLink(e env.Env, receiptCode string, gc int64, receiptTime string) string {
 	var baseURL string
 
-	if e == env.ProdEnv {
+	if e == env.PROD {
 		baseURL = VerifyReceiptProductionURL
 	} else {
 		baseURL = VerifyReceiptTestingURL

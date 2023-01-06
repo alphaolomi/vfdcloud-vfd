@@ -204,7 +204,7 @@ var (
 
 func RequestURL(e env.Env, action Action) string {
 	var u *requestURL
-	if e == env.ProdEnv {
+	if e == env.PROD {
 		u = productionURLs
 	} else {
 		u = stagingURLs
