@@ -28,8 +28,27 @@ are welcome.
 ```go
 package main
 
-import "github.com/vfdcloud/vfd"
+import (
+    "fmt"
+    "github.com/vfdcloud/vfd"
+	"github.com/vfdcloud/vfd/pkg/env"
+)
 
-/// fetching token
+// Fetching Access Token
+func main(){
+	tokenURL := vfd.RequestURL(env.DEV,vfd.FetchTokenAction)
+	request := &vfd.TokenRequest{
+		Username:  "",
+		Password:  "",
+		GrantType: "",
+	}
+	response, err := vfd.FetchToken(context.Background(), tokenURL, request)
+	if err != nil {
+		fmt.Printf("failed to fetch token: %v", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("token: %+v", response)
+}
 
 ```
