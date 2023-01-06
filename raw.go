@@ -9,7 +9,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/vfdcloud/base"
+	"github.com/vfdcloud/vfd/pkg/env"
+
 	vhttp "github.com/vfdcloud/vfd/internal/http"
 	"github.com/vfdcloud/vfd/internal/models"
 )
@@ -19,7 +20,7 @@ type (
 	// RawRequest contains information needed to send receipt/z report file
 	// to the vfd server.
 	RawRequest struct {
-		Env      base.Env
+		Env      env.Env
 		Action   Action
 		FilePath string
 	}

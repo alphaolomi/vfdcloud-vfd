@@ -81,7 +81,6 @@ func FetchTokenWithMw(ctx context.Context, url string, request *TokenRequest, ca
 // FetchToken wraps internally a *http.Client responsible for making http calls. It has a timeout
 // of 70 seconds. It is advised to call this only when the previous token has expired. It will still
 // work if called before the token expires.
-// It is a context-aware function with a timeout of 1 minute
 func FetchToken(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
 	httpClient := xhttp.Instance()
 	return fetchToken(ctx, httpClient, url, request)

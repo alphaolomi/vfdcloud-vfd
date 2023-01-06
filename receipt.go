@@ -12,9 +12,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/vfdcloud/vfd/pkg/env"
+
 	xhttp "github.com/vfdcloud/vfd/internal/http"
 
-	"github.com/vfdcloud/base"
 	"github.com/vfdcloud/vfd/internal/models"
 )
 
@@ -211,11 +212,11 @@ func ReceiptBytes(privateKey *rsa.PrivateKey, params ReceiptParams, customer Cus
 }
 
 // ReceiptLink creates a link to the receipt it accepts RECEIPTCODE, GC and the RECEIPTTIME
-// and base.Env to know if the receipt was created during testing or production.
-func ReceiptLink(e base.Env, receiptCode string, gc int64, receiptTime string) string {
+// and env.Env to know if the receipt was created during testing or production.
+func ReceiptLink(e env.Env, receiptCode string, gc int64, receiptTime string) string {
 	var baseURL string
 
-	if e == base.ProdEnv {
+	if e == env.ProdEnv {
 		baseURL = VerifyReceiptProductionURL
 	} else {
 		baseURL = VerifyReceiptTestingURL

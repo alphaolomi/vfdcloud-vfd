@@ -1,6 +1,8 @@
 package vfd
 
 import (
+	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1" //nolint:gosec
 	"crypto/x509"
@@ -8,7 +10,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/vfdcloud/base/crypto"
 	"software.sslmate.com/src/go-pkcs12"
 )
 
@@ -71,13 +72,13 @@ func LoadCert(path, password string) (*rsa.PrivateKey, *x509.Certificate, error)
 }
 
 func Sign(privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {
-	signature, err := crypto.SignPayload(privateKey, payload)
+	signature, err := signPayload(privateKey, payload)
 	if err != nil {
 		return nil, fmt.Errorf("unable to sign the payload: %w", err)
 	}
 
 	hash := sha1.Sum(payload) //nolint:gosec
-	err = crypto.VerifySignature(&privateKey.PublicKey, hash[:], signature)
+	err = verifySignature(&privateKey.PublicKey, hash[:], signature)
 	if err != nil {
 		return nil, fmt.Errorf("could not verify signature %w", err)
 	}
@@ -92,7 +93,7 @@ func VerifySignature(publicKey *rsa.PublicKey, payload []byte, signature string)
 	}
 
 	hash := sha1.Sum(payload) //nolint:gosec
-	err = crypto.VerifySignature(publicKey, hash[:], sg)
+	err = verifySignature(publicKey, hash[:], sg)
 	if err != nil {
 		return fmt.Errorf("could not verify signature %w", err)
 	}
@@ -101,7 +102,7 @@ func VerifySignature(publicKey *rsa.PublicKey, payload []byte, signature string)
 }
 
 func SignPayload(privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {
-	out, err := crypto.SignPayload(privateKey, payload)
+	out, err := signPayload(privateKey, payload)
 	if err != nil {
 		return nil, fmt.Errorf("unable to sign the payload: %w", err)
 	}
@@ -112,4 +113,39 @@ func SignPayload(privateKey *rsa.PrivateKey, payload []byte) ([]byte, error) {
 	}
 
 	return out, nil
+}
+
+func signPayload(pub *rsa.PrivateKey, payload []byte) ([]byte, error) {
+	hasher := crypto.SHA1.New()
+	hasher.Write(payload)
+
+	out, err := rsa.SignPKCS1v15(rand.Reader, pub, crypto.SHA1, hasher.Sum(nil))
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
+func ParsePfxCertificate(certPath string, password string) (*rsa.PrivateKey, *x509.Certificate, error) {
+	buf, err := os.ReadFile(certPath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	privateKey, parseCertificate, err := pkcs12.Decode(buf, password)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	rsaPrivateKey, ok := privateKey.(*rsa.PrivateKey)
+	if !ok {
+		return nil, nil, err
+	}
+
+	return rsaPrivateKey, parseCertificate, nil
+}
+
+func verifySignature(pub *rsa.PublicKey, hash []byte, sig []byte) error {
+	return rsa.VerifyPKCS1v15(pub, crypto.SHA1, hash, sig)
 }

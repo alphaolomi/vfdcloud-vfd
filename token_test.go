@@ -27,30 +27,62 @@ func CreateTestFetchTokenFunc(t *testing.T, params *FetchTokenTestParams) FetchT
 
 	return func(ctx context.Context, url string, request *TokenRequest) (*TokenResponse, error) {
 		_, cancel := context.WithTimeout(context.TODO(), params.Timeout)
+
+		t.Logf("\nrequest: %+v, params %+v\n", request, params)
 		defer cancel()
 		// check if we should panic
 		if params.Panic {
 			return nil, fmt.Errorf("panic")
 		}
-
-		// check if we should return context error
 		if params.ContextErr {
 			return nil, context.Canceled
 		}
 
+		if request.Username != params.Username {
+			return &TokenResponse{
+				Code:        "240",
+				Message:     "invalid username",
+				AccessToken: "",
+				TokenType:   "",
+				ExpiresIn:   0,
+				Error:       "invalid username",
+			}, nil
+		}
+
+		if request.Password != params.Password {
+			return &TokenResponse{
+				Code:        "241",
+				Message:     "invalid password",
+				AccessToken: "",
+				TokenType:   "",
+				ExpiresIn:   0,
+				Error:       "invalid password",
+			}, nil
+		}
+
+		if request.GrantType != params.GrantType {
+			return &TokenResponse{
+				Code:        "242",
+				Message:     "invalid grant type",
+				AccessToken: "",
+				TokenType:   "",
+				ExpiresIn:   0,
+				Error:       "invalid grant type",
+			}, nil
+		}
+
 		return &TokenResponse{
-			Code:        "",
-			Message:     "",
-			AccessToken: "",
-			TokenType:   "",
-			ExpiresIn:   0,
+			Code:        "0",
+			Message:     "success",
+			AccessToken: "access_token_for_test",
+			TokenType:   "bearer",
+			ExpiresIn:   3600,
 			Error:       "",
 		}, nil
 	}
 }
 
 func TestFetchToken(t *testing.T) {
-	t.Parallel()
 	type args struct {
 		ctx     context.Context
 		url     string
@@ -75,23 +107,23 @@ func TestFetchToken(t *testing.T) {
 				request: &TokenRequest{
 					Username:  "admin",
 					Password:  "admin",
-					GrantType: "client_credentials",
+					GrantType: "credentials",
 				},
 				params: &FetchTokenTestParams{
-					Username:   "",
-					Password:   "",
-					GrantType:  "",
-					Panic:      true,
+					Username:   "admin",
+					Password:   "admin",
+					GrantType:  "credentials",
+					Panic:      false,
 					ContextErr: false,
-					Timeout:    0,
+					Timeout:    1 * time.Second,
 				},
 			},
 			want: &TokenResponse{
-				Code:        "",
-				Message:     "",
-				AccessToken: "",
-				TokenType:   "",
-				ExpiresIn:   0,
+				Code:        "0",
+				Message:     "success",
+				AccessToken: "access_token_for_test",
+				TokenType:   "bearer",
+				ExpiresIn:   3600,
 				Error:       "",
 			},
 			wantErr:        false,
@@ -100,9 +132,8 @@ func TestFetchToken(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// launch a test server in a goroutine
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				// get request body then call fn
 				// compare response with want
@@ -129,6 +160,8 @@ func TestFetchToken(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			t.Logf("\nreqURL: %s, request %+v\n", reqURL, tt.args.request)
 			got, err := FetchToken(tt.args.ctx, reqURL, tt.args.request)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FetchToken() error = %v, wantErr %v", err, tt.wantErr)

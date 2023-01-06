@@ -8,7 +8,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/vfdcloud/base"
+	"github.com/vfdcloud/vfd/pkg/env"
+
 	"github.com/vfdcloud/vfd"
 )
 
@@ -43,29 +44,29 @@ var _ vfd.Service = (*TestServer)(nil)
 type (
 	TestServer struct {
 		http              *httptest.Server
-		Env               base.Env
+		Env               env.Env
 		RegistrationReq   *vfd.RegistrationRequest
 		RegistrationResp  *vfd.RegistrationResponse
-		GetRequestURLFunc func(env base.Env, action vfd.Action) string
+		GetRequestURLFunc func(env env.Env, action vfd.Action) string
 	}
 )
 
 // NewTestServer returns a new test server that can be used to test the client
 // against. The server is configured to respond to
-func NewTestServer(t *testing.T, env base.Env, action vfd.Action) (*TestServer, error) {
+func NewTestServer(t *testing.T, envX env.Env, action vfd.Action) (*TestServer, error) {
 	httpServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch action {
 		case vfd.RegisterClientAction:
 			if r.Method != http.MethodPost {
 				t.Errorf("expected POST request, got %s", r.Method)
 			}
-			switch env {
-			case base.ProdEnv:
+			switch envX {
+			case env.ProdEnv:
 				if r.URL.Path != RegisterProductionEndpoint {
 					t.Errorf("expected %s request, got %s", RegisterProductionEndpoint, r.URL.Path)
 				}
 
-			case base.StagingEnv:
+			case env.StagingEnv:
 				if r.URL.Path != RegisterTestingEndpoint {
 					t.Errorf("expected %s request, got %s", RegisterTestingEndpoint, r.URL.Path)
 				}
@@ -111,7 +112,7 @@ func TestSubmitRawRequest(t *testing.T) {
 	type testCase struct {
 		name  string
 		input struct {
-			Env      base.Env
+			Env      env.Env
 			Action   vfd.Action
 			FilePath string
 			Headers  *vfd.RequestHeaders

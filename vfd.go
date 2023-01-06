@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"strings"
 
-	"github.com/vfdcloud/base"
+	"github.com/vfdcloud/vfd/pkg/env"
 )
 
 const (
@@ -202,9 +202,9 @@ var (
 	}
 )
 
-func RequestURL(e base.Env, action Action) string {
+func RequestURL(e env.Env, action Action) string {
 	var u *requestURL
-	if e == base.ProdEnv {
+	if e == env.ProdEnv {
 		u = productionURLs
 	} else {
 		u = stagingURLs
